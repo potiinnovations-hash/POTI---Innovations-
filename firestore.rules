@@ -47,7 +47,7 @@ service cloud.firestore {
       return data.keys().hasAll(['titleKa', 'titleEn', 'imageUrl', 'targetUrl']) &&
              data.titleKa is string && data.titleKa.size() <= 200 &&
              data.titleEn is string && data.titleEn.size() <= 200 &&
-             data.imageUrl is string && data.imageUrl.size() <= 500 &&
+             data.imageUrl is string && data.imageUrl.size() <= 800000 &&
              data.targetUrl is string && data.targetUrl.size() <= 500 &&
              (!('descriptionKa' in data) || (data.descriptionKa is string && data.descriptionKa.size() <= 2000)) &&
              (!('descriptionEn' in data) || (data.descriptionEn is string && data.descriptionEn.size() <= 2000)) &&
@@ -56,7 +56,7 @@ service cloud.firestore {
     }
 
     function isValidSettings(data) {
-      return (!('logoUrl' in data) || (data.logoUrl is string && data.logoUrl.size() <= 500)) &&
+      return (!('logoUrl' in data) || (data.logoUrl is string && data.logoUrl.size() <= 800000)) &&
              (!('headerTitleKa' in data) || (data.headerTitleKa is string && data.headerTitleKa.size() <= 200)) &&
              (!('headerTitleEn' in data) || (data.headerTitleEn is string && data.headerTitleEn.size() <= 200)) &&
              (!('pageTitleKa' in data) || (data.pageTitleKa is string && data.pageTitleKa.size() <= 200)) &&

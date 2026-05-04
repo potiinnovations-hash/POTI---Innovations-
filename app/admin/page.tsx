@@ -55,6 +55,20 @@ export default function AdminPage() {
   const [expandedEnItems, setExpandedEnItems] = useState<Set<string>>(new Set());
   const [translatingId, setTranslatingId] = useState<string | null>(null);
 
+  const handleImageUpload = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (file.size > 800000) {
+        alert(user?.email?.includes('ka') || true ? 'სურათის ზომა არ უნდა აღემატებოდეს 800KB-ს' : 'Image size must be less than 800KB');
+        reject(new Error('File too large'));
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const toggleEnFields = (id: string) => {
     const newSet = new Set(expandedEnItems);
     if (newSet.has(id)) {
@@ -429,13 +443,50 @@ export default function AdminPage() {
                     </div>
                     
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">სურათის ლინკი</label>
-                      <input
-                        className="w-full border p-2 rounded-lg"
-                        placeholder="სურათის ლინკი"
-                        value={item.imageUrl}
-                        onChange={(e) => handleUpdateCatalogItem(item.id, { imageUrl: e.target.value })}
-                      />
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">კატალოგის სურათი (ატვირთვა)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          id={`file-${item.id}`}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              try {
+                                const base64 = await handleImageUpload(file);
+                                handleUpdateCatalogItem(item.id, { imageUrl: base64 });
+                              } catch (err) {
+                                console.error('Upload failed', err);
+                              }
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`file-${item.id}`}
+                          className="flex-grow border p-2 rounded-lg bg-blue-50 hover:bg-blue-100 cursor-pointer text-xs flex items-center justify-center gap-2 text-blue-600 font-bold border-blue-200"
+                        >
+                          <Plus size={14} /> სურათის ატვირთვა
+                        </label>
+                      </div>
+                      <div className="mt-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase leading-none">ან მიუთითეთ ლინკი</label>
+                        <input
+                          className="w-full border p-2 rounded-lg text-xs mt-1"
+                          placeholder="სურათის ლინკი"
+                          value={item.imageUrl.startsWith('data:') ? 'ატვირთულია ფაილი' : item.imageUrl}
+                          onChange={(e) => handleUpdateCatalogItem(item.id, { imageUrl: e.target.value })}
+                          disabled={item.imageUrl.startsWith('data:')}
+                        />
+                        {item.imageUrl.startsWith('data:') && (
+                          <button 
+                            onClick={() => handleUpdateCatalogItem(item.id, { imageUrl: '' })}
+                            className="text-[10px] text-red-500 font-bold mt-1 hover:underline"
+                          >
+                            ატვირთული სურათის წაშლა / ლინკის ჩასმა
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-400 uppercase">გადასასვლელი ლინკი</label>
@@ -546,12 +597,56 @@ export default function AdminPage() {
               <div className="space-y-4">
                 <h3 className="font-bold text-slate-700 border-b pb-2">ბრენდინგი და იდენტობა</h3>
                 <div>
-                  <label className="block text-sm font-bold text-slate-600 mb-2">ლოგოს ლინკი</label>
-                  <input
-                    className="w-full border p-3 rounded-xl"
-                    value={settings.logoUrl || ''}
-                    onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
-                  />
+                  <label className="block text-sm font-bold text-slate-600 mb-2">ლოგო (ატვირთვა)</label>
+                  <div className="flex gap-4 items-center">
+                    <div className="w-16 h-16 bg-slate-100 rounded-xl overflow-hidden shrink-0 relative border">
+                      {settings.logoUrl ? (
+                         <Image src={settings.logoUrl} alt="Logo" fill className="object-contain" referrerPolicy="no-referrer" />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-slate-300">
+                          <ImageIcon size={24} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-grow space-y-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id="logo-upload"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            try {
+                              const base64 = await handleImageUpload(file);
+                              setSettings({ ...settings, logoUrl: base64 });
+                            } catch (err) {}
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="logo-upload"
+                        className="w-full border p-3 rounded-xl bg-blue-50 hover:bg-blue-100 cursor-pointer text-sm flex items-center justify-center gap-2 text-blue-600 font-bold border-blue-200"
+                      >
+                        <Plus size={18} /> ლოგოს ატვირთვა
+                      </label>
+                      <input
+                        className="w-full border p-2 rounded-lg text-xs"
+                        placeholder="ან ჩასვით ლოგოს ლინკი"
+                        value={settings.logoUrl?.startsWith('data:') ? 'ატვირთულია ფაილი' : (settings.logoUrl || '')}
+                        onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
+                        disabled={settings.logoUrl?.startsWith('data:')}
+                      />
+                      {settings.logoUrl?.startsWith('data:') && (
+                        <button 
+                          onClick={() => setSettings({ ...settings, logoUrl: '' })}
+                          className="text-[10px] text-red-500 font-bold hover:underline"
+                        >
+                          ატვირთული ლოგოს წაშლა
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
                   <div>
