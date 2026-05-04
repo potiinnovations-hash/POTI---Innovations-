@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "CatalogItem": {
+      "title": "Catalog Item",
+      "description": "A single item in the animated catalog",
+      "type": "object",
+      "properties": {
+        "titleKa": { "type": "string", "description": "Title in Georgian" },
+        "titleEn": { "type": "string", "description": "Title in English" },
+        "imageUrl": { "type": "string", "description": "URL of the image inside the banner" },
+        "descriptionKa": { "type": "string", "description": "Description in Georgian" },
+        "descriptionEn": { "type": "string", "description": "Description in English" },
+        "targetUrl": { "type": "string", "description": "URL to open on click" },
+        "order": { "type": "integer", "description": "Display order" },
+        "isUnderDevelopment": { "type": "boolean", "description": "Whether the item is under development" }
+      },
+      "required": ["titleKa", "titleEn", "imageUrl", "targetUrl"]
+    },
+    "GlobalSettings": {
+      "title": "Global Settings",
+      "description": "Global application settings",
+      "type": "object",
+      "properties": {
+        "logoUrl": { "type": "string", "description": "URL of the template logo" },
+        "headerTitleKa": { "type": "string", "description": "Header title in Georgian" },
+        "headerTitleEn": { "type": "string", "description": "Header title in English" },
+        "pageTitleKa": { "type": "string", "description": "Page title in Georgian" },
+        "pageTitleEn": { "type": "string", "description": "Page title in English" },
+        "siteDescriptionKa": { "type": "string", "description": "Site description in Georgian" },
+        "siteDescriptionEn": { "type": "string", "description": "Site description in English" },
+        "primaryColor": { "type": "string", "description": "Primary color hex code" },
+        "accentColor": { "type": "string", "description": "Accent color hex code" },
+        "itemsPerRow": { "type": "integer", "description": "Number of items per row on desktop" },
+        "footerTextKa": { "type": "string", "description": "Footer text in Georgian" },
+        "footerTextEn": { "type": "string", "description": "Footer text in English" },
+        "footerLinks": { "type": "array", "description": "List of footer links", "items": { "type": "object", "properties": { "labelKa": { "type": "string" }, "labelEn": { "type": "string" }, "url": { "type": "string" } } } }
+      }
+    },
+    "User": {
+      "title": "User",
+      "description": "A user of the application",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] }
+      },
+      "required": ["email", "role"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A notification to display on the main screen",
+      "type": "object",
+      "properties": {
+        "messageKa": { "type": "string", "description": "Message in Georgian" },
+        "messageEn": { "type": "string", "description": "Message in English" },
+        "active": { "type": "boolean", "description": "Whether the notification is active" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["messageKa", "messageEn", "active"]
+    }
+  },
+  "firestore": {
+    "/catalog": {
+      "schema": "CatalogItem",
+      "description": "Collection of catalog items"
+    },
+    "/settings/global": {
+      "schema": "GlobalSettings",
+      "description": "Global settings document"
+    },
+    "/notifications": {
+      "schema": "Notification",
+      "description": "Collection of notifications"
+    },
+    "/users": {
+      "schema": "User",
+      "description": "Collection of user profiles"
+    }
+  }
+}

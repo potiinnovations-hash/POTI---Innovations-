@@ -1,0 +1,133 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helper Functions ---
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isEmailVerified() && (
+        request.auth.token.email in [
+          "giorgiswork@gmail.com", 
+          "giorgiezb@gmail.com", 
+          "potiinnovations@gmail.com"
+        ] ||
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Blueprints ---
+
+    function isValidCatalogItem(data) {
+      return data.keys().hasAll(['titleKa', 'titleEn', 'imageUrl', 'targetUrl']) &&
+             data.titleKa is string && data.titleKa.size() <= 200 &&
+             data.titleEn is string && data.titleEn.size() <= 200 &&
+             data.imageUrl is string && data.imageUrl.size() <= 500 &&
+             data.targetUrl is string && data.targetUrl.size() <= 500 &&
+             (!('descriptionKa' in data) || (data.descriptionKa is string && data.descriptionKa.size() <= 2000)) &&
+             (!('descriptionEn' in data) || (data.descriptionEn is string && data.descriptionEn.size() <= 2000)) &&
+             (!('order' in data) || data.order is int) &&
+             (!('isUnderDevelopment' in data) || data.isUnderDevelopment is bool);
+    }
+
+    function isValidSettings(data) {
+      return (!('logoUrl' in data) || (data.logoUrl is string && data.logoUrl.size() <= 500)) &&
+             (!('headerTitleKa' in data) || (data.headerTitleKa is string && data.headerTitleKa.size() <= 200)) &&
+             (!('headerTitleEn' in data) || (data.headerTitleEn is string && data.headerTitleEn.size() <= 200)) &&
+             (!('pageTitleKa' in data) || (data.pageTitleKa is string && data.pageTitleKa.size() <= 200)) &&
+             (!('pageTitleEn' in data) || (data.pageTitleEn is string && data.pageTitleEn.size() <= 200)) &&
+             (!('siteDescriptionKa' in data) || (data.siteDescriptionKa is string && data.siteDescriptionKa.size() <= 1000)) &&
+             (!('siteDescriptionEn' in data) || (data.siteDescriptionEn is string && data.siteDescriptionEn.size() <= 1000)) &&
+             (!('primaryColor' in data) || (data.primaryColor is string && data.primaryColor.size() <= 10)) &&
+             (!('accentColor' in data) || (data.accentColor is string && data.accentColor.size() <= 10)) &&
+             (!('itemsPerRow' in data) || data.itemsPerRow is int) &&
+             (!('footerTextKa' in data) || (data.footerTextKa is string && data.footerTextKa.size() <= 500)) &&
+             (!('footerTextEn' in data) || (data.footerTextEn is string && data.footerTextEn.size() <= 500)) &&
+             (!('footerLinks' in data) || data.footerLinks is list);
+    }
+
+    function isValidNotification(data) {
+      return data.keys().hasAll(['messageKa', 'messageEn', 'active']) &&
+             data.messageKa is string && data.messageKa.size() <= 500 &&
+             data.messageEn is string && data.messageEn.size() <= 500 &&
+             data.active is bool &&
+             (!('createdAt' in data) || data.createdAt is timestamp);
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'role']) &&
+             data.email is string && data.email.size() <= 200 &&
+             data.role in ['admin', 'user'] &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100));
+    }
+
+    // --- Path Rules ---
+
+    match /catalog/{itemId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(itemId) && isValidCatalogItem(incoming()) && incoming().keys().size() <= 10;
+      allow update: if isAdmin() && isValidCatalogItem(incoming()) && 
+                    incoming().diff(existing()).affectedKeys().hasOnly([
+                      'titleKa', 'titleEn', 'imageUrl', 'targetUrl', 
+                      'descriptionKa', 'descriptionEn', 'order', 'isUnderDevelopment'
+                    ]);
+      allow delete: if isAdmin();
+    }
+
+    match /settings/global {
+      allow read: if true;
+      allow write: if isAdmin() && isValidSettings(incoming());
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(notificationId) && isValidNotification(incoming()) && incoming().keys().size() <= 5;
+      allow update: if isAdmin() && isValidNotification(incoming()) && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['messageKa', 'messageEn', 'active', 'createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      
+      allow create: if isSignedIn() && request.auth.uid == userId && 
+                    isValidId(userId) && isValidUser(incoming()) &&
+                    incoming().role == 'user' && // Self-promotion forbidden on create
+                    incoming().email == request.auth.token.email;
+      
+      allow update: if (isAdmin() && isValidUser(incoming())) || 
+                    (isSignedIn() && request.auth.uid == userId && 
+                     isValidUser(incoming()) &&
+                     incoming().role == existing().role && // Immortality of role for users
+                     incoming().email == existing().email &&
+                     incoming().diff(existing()).affectedKeys().hasOnly(['displayName']));
+      
+      allow delete: if isAdmin();
+    }
+  }
+}
