@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Globe, LogIn, Settings } from 'lucide-react';
+import { Sun, Moon, Globe, LogIn, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { auth } from '@/firebase';
@@ -26,10 +26,24 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
 
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed', error);
+      if (error.code === 'auth/popup-blocked') {
+        alert(lang === 'ka' ? 'ფანჯარა დაიბლოკა. გთხოვთ ჩართოთ Popup-ები.' : 'Popup was blocked. Please enable popups for this site.');
+      } else {
+        alert(lang === 'ka' ? 'ავტორიზაცია ვერ მოხერხდა: ' + error.message : 'Login failed: ' + error.message);
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+    } catch (error) {
+      console.error('Logout failed', error);
     }
   };
 
@@ -84,16 +98,27 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
 
           {/* Admin Link */}
           {user ? (
-            <Link
-              href="/admin"
-              className="w-10 h-10 rounded-full bg-blue-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400 hover:scale-110 transition-transform flex items-center justify-center"
-            >
-              <Settings size={20} />
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/admin"
+                className="w-10 h-10 rounded-full bg-blue-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400 hover:scale-110 transition-transform flex items-center justify-center"
+                title={lang === 'ka' ? 'მართვა' : 'Admin Panel'}
+              >
+                <Settings size={20} />
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:scale-110 transition-transform flex items-center justify-center"
+                title={lang === 'ka' ? 'გამოსვლა' : 'Log out'}
+              >
+                <LogOut size={20} />
+              </button>
+            </div>
           ) : (
             <button
               onClick={handleLogin}
               className="w-10 h-10 rounded-full bg-blue-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400 hover:scale-110 transition-transform flex items-center justify-center"
+              title={lang === 'ka' ? 'შესვლა' : 'Log in'}
             >
               <LogIn size={20} />
             </button>
@@ -101,5 +126,6 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
         </div>
       </div>
     </header>
+
   );
 };
