@@ -2,137 +2,181 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Info, AlertCircle, X } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { AnimatePresence } from 'motion/react';
 
 export interface CatalogItem {
   id: string;
   titleKa: string;
   titleEn: string;
+  categoryId?: string;
   imageUrl: string;
   targetUrl: string;
   descriptionKa?: string;
   descriptionEn?: string;
   order?: number;
   isUnderDevelopment?: boolean;
+  redirectDirectly?: boolean;
+  phone?: string;
+  price?: string;
+  priceEn?: string;
+  location?: string;
+  addressKa?: string;
+  addressEn?: string;
+  workHours?: string;
+  gallery?: string[];
+  facebookUrl?: string;
+  facebookName?: string;
+  email?: string;
+  showWebsite?: boolean;
+  titleColor?: string;
+  ctaButton?: {
+    textKa: string;
+    textEn: string;
+    url: string;
+    icon: string;
+  };
 }
 
 interface CatalogProps {
   items: CatalogItem[];
   lang: 'ka' | 'en';
   itemsPerRow?: number;
+  settings?: any;
 }
 
-export const Catalog = ({ items, lang, itemsPerRow = 5 }: CatalogProps) => {
+export const Catalog = ({ items, lang, itemsPerRow = 4, settings = {} }: CatalogProps) => {
   const [showDevMessage, setShowDevMessage] = React.useState(false);
+  const router = useRouter();
 
   const handleItemClick = (item: CatalogItem) => {
     if (item.isUnderDevelopment) {
       setShowDevMessage(true);
       return;
     }
-    window.open(item.targetUrl, '_blank');
+    
+    if (item.redirectDirectly) {
+      window.open(item.targetUrl, '_blank');
+    } else {
+      router.push(`/item/${item.id}`);
+    }
   };
 
   const gridColsClass = {
     1: 'grid-cols-1',
-    2: 'grid-cols-1 md:grid-cols-2',
-    3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-    4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
-    5: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5',
-    6: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6',
-  }[itemsPerRow as 1|2|3|4|5|6] || 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5';
+    2: 'grid-cols-1 sm:grid-cols-2',
+    3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+    4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
+    5: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5',
+  }[itemsPerRow as 1 | 2 | 3 | 4 | 5] || 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5';
 
   return (
-    <>
-      <div className={`grid ${gridColsClass} gap-6`}>
-        {items.map((item, index) => (
+    <div className="w-full">
+      <AnimatePresence>
+        {showDevMessage && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDevMessage(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800"
+            >
+              <div className="absolute top-0 right-0 p-6">
+                <button 
+                  onClick={() => setShowDevMessage(false)}
+                  className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="w-24 h-24 bg-yellow-400 rounded-[2rem] flex items-center justify-center text-slate-900 shadow-xl shadow-yellow-200 animate-pulse">
+                  <AlertCircle size={48} strokeWidth={2.5} />
+                </div>
+                
+                <div className="space-y-3">
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                    {lang === 'ka' ? 'მუშავდება' : 'Under Development'}
+                  </h3>
+                  <p className="text-lg font-bold text-slate-500 dark:text-slate-400 leading-relaxed px-4">
+                    {lang === 'ka' 
+                      ? 'ეს სერვისი მალე დაემატება, ბოდიშს გიხდით შეფერხებისთვის' 
+                      : 'This service will be added soon. We apologize for any inconvenience.'}
+                  </p>
+                </div>
+
+                <button 
+                  onClick={() => setShowDevMessage(false)}
+                  className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] font-black text-lg transition-transform active:scale-95 shadow-xl"
+                >
+                  {lang === 'ka' ? 'გასაგებია' : 'Understand'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <div className={`grid ${gridColsClass} gap-6 md:gap-8`}>
+        {items.sort((a, b) => (a.order || 0) - (b.order || 0)).map((item, index) => (
           <motion.div
             key={item.id}
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ scale: 1.02 }}
-            className="group relative h-[400px] rounded-2xl overflow-hidden shadow-xl cursor-pointer bg-blue-900"
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.05 }}
+            whileHover={{ y: -5, scale: 1.01 }}
             onClick={() => handleItemClick(item)}
+            className="group relative cursor-pointer"
           >
-            {/* Banner Image */}
-            <Image
-              src={item.imageUrl}
-              alt={lang === 'ka' ? item.titleKa : item.titleEn}
-              fill
-              className="object-cover opacity-80 group-hover:opacity-60 transition-opacity duration-500"
-              referrerPolicy="no-referrer"
-            />
+            <div className="relative aspect-[4/5] rounded-[2.2rem] overflow-hidden bg-white dark:bg-slate-900 border-2 border-white dark:border-slate-800 shadow-xl transition-all duration-500 overflow-hidden">
+              <Image
+                src={item.imageUrl}
+                alt={lang === 'ka' ? item.titleKa : item.titleEn}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                referrerPolicy="no-referrer"
+              />
+              
+              {/* Development Overlay */}
+              {item.isUnderDevelopment && (
+                <div className="absolute top-4 right-4 z-10">
+                  <div className="bg-yellow-400 text-slate-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-md border border-white">
+                    {lang === 'ka' ? 'მუშავდება' : 'In Progress'}
+                  </div>
+                </div>
+              )}
 
-            {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-950 via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-
-            {/* Under Development Badge */}
-            {item.isUnderDevelopment && (
-              <div className="absolute top-4 right-4 z-10">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="bg-yellow-400 text-blue-950 px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1"
+              {/* Title Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent flex flex-col justify-end p-5 transition-transform duration-500">
+                <h3 
+                  className="font-black text-xl md:text-2xl leading-none mb-1 group-hover:mb-2 transition-all"
+                  style={{ color: item.titleColor || settings.titleColor || '#f59e0b' }} // Use global titleColor as fallback
                 >
-                  <span className="w-2 h-2 bg-blue-950 rounded-full animate-pulse" />
-                  {lang === 'ka' ? 'მუშავდება' : 'Under Development'}
-                </motion.div>
-              </div>
-            )}
-
-            {/* Content */}
-            <div className="absolute inset-0 p-6 flex flex-col justify-end transform transition-transform duration-500">
-              <motion.h3
-                className="text-2xl font-bold text-yellow-400 mb-2 drop-shadow-lg"
-                layoutId={`title-${item.id}`}
-              >
-                {lang === 'ka' ? item.titleKa : item.titleEn}
-              </motion.h3>
-
-              <div className="overflow-hidden max-h-0 group-hover:max-h-40 transition-all duration-500 ease-in-out">
-                <p className="text-white/90 text-sm mb-4 line-clamp-3">
+                  {lang === 'ka' ? item.titleKa : item.titleEn}
+                </h3>
+                <p 
+                  className="text-xs font-medium line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ color: settings.textColor || '#cbd5e1' }} // default to a light color for overlay
+                >
                   {lang === 'ka' ? item.descriptionKa : item.descriptionEn}
                 </p>
-                <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm uppercase tracking-wider">
-                  {lang === 'ka' ? 'გახსნა' : 'Open'} <ExternalLink size={14} />
-                </div>
               </div>
             </div>
-
-            {/* Highlight Border */}
-            <div className="absolute inset-0 border-4 border-transparent group-hover:border-yellow-400/50 rounded-2xl transition-colors duration-500" />
           </motion.div>
         ))}
       </div>
-
-      {/* Development Message Modal */}
-      {showDevMessage && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl border-t-4 border-yellow-400"
-          >
-            <h4 className="text-xl font-bold text-blue-950 mb-4">
-              {lang === 'ka' ? 'ინფორმაცია' : 'Information'}
-            </h4>
-            <p className="text-gray-700 leading-relaxed mb-6">
-              {lang === 'ka' 
-                ? 'ეს ფუნქცია დროებით მიუწვდომელია, ქალაქ ფოთის მდგრადი განვითარებისა და ინოვაციების სამსახურის ციფრული დეპარტამენდი მუშაობს, რომ ეს ფუნქცია მალე გააქტიურდეს. ბოდიშს გიხდით შეფერხებისთვის.'
-                : 'This feature is temporarily unavailable. The Digital Department of the Poti Sustainable Development and Innovation Service is working to activate this feature soon. We apologize for the delay.'
-              }
-            </p>
-            <button
-              onClick={() => setShowDevMessage(false)}
-              className="w-full bg-blue-950 text-white py-3 rounded-xl font-bold hover:bg-blue-900 transition-colors"
-            >
-              {lang === 'ka' ? 'გასაგებია' : 'Understood'}
-            </button>
-          </motion.div>
-        </div>
-      )}
-    </>
+    </div>
   );
 };

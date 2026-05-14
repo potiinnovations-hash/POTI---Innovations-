@@ -1,81 +1,113 @@
 {
   "entities": {
-    "CatalogItem": {
+    "catalog": {
       "title": "Catalog Item",
-      "description": "A single item in the animated catalog",
+      "description": "Item in the city directory",
       "type": "object",
       "properties": {
-        "titleKa": { "type": "string", "description": "Title in Georgian" },
-        "titleEn": { "type": "string", "description": "Title in English" },
-        "imageUrl": { "type": "string", "description": "URL of the image inside the banner" },
-        "descriptionKa": { "type": "string", "description": "Description in Georgian" },
-        "descriptionEn": { "type": "string", "description": "Description in English" },
-        "targetUrl": { "type": "string", "description": "URL to open on click" },
-        "order": { "type": "integer", "description": "Display order" },
-        "isUnderDevelopment": { "type": "boolean", "description": "Whether the item is under development" }
-      },
-      "required": ["titleKa", "titleEn", "imageUrl", "targetUrl"]
-    },
-    "GlobalSettings": {
-      "title": "Global Settings",
-      "description": "Global application settings",
-      "type": "object",
-      "properties": {
-        "logoUrl": { "type": "string", "description": "URL of the template logo" },
-        "headerTitleKa": { "type": "string", "description": "Header title in Georgian" },
-        "headerTitleEn": { "type": "string", "description": "Header title in English" },
-        "pageTitleKa": { "type": "string", "description": "Page title in Georgian" },
-        "pageTitleEn": { "type": "string", "description": "Page title in English" },
-        "siteDescriptionKa": { "type": "string", "description": "Site description in Georgian" },
-        "siteDescriptionEn": { "type": "string", "description": "Site description in English" },
-        "primaryColor": { "type": "string", "description": "Primary color hex code" },
-        "accentColor": { "type": "string", "description": "Accent color hex code" },
-        "itemsPerRow": { "type": "integer", "description": "Number of items per row on desktop" },
-        "footerTextKa": { "type": "string", "description": "Footer text in Georgian" },
-        "footerTextEn": { "type": "string", "description": "Footer text in English" },
-        "footerLinks": { "type": "array", "description": "List of footer links", "items": { "type": "object", "properties": { "labelKa": { "type": "string" }, "labelEn": { "type": "string" }, "url": { "type": "string" } } } }
+        "titleKa": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "descriptionKa": { "type": "string" },
+        "descriptionEn": { "type": "string" },
+        "targetUrl": { "type": "string" },
+        "redirectDirectly": { "type": "boolean" },
+        "phone": { "type": "string" },
+        "price": { "type": "string" },
+        "priceEn": { "type": "string" },
+        "location": { "type": "string" },
+        "addressKa": { "type": "string" },
+        "addressEn": { "type": "string" },
+        "workHours": { "type": "string" },
+        "gallery": { "type": "array", "items": { "type": "string" } },
+        "facebookUrl": { "type": "string" },
+        "facebookName": { "type": "string" },
+        "email": { "type": "string" },
+        "showWebsite": { "type": "boolean" },
+        "ctaButton": {
+          "type": "object",
+          "properties": {
+            "textKa": { "type": "string" },
+            "textEn": { "type": "string" },
+            "url": { "type": "string" },
+            "icon": { "type": "string" }
+          }
+        },
+        "order": { "type": "integer" },
+        "isUnderDevelopment": { "type": "boolean" }
       }
     },
-    "User": {
-      "title": "User",
-      "description": "A user of the application",
+    "settings": {
+      "title": "Global Settings",
+      "description": "App-wide configuration",
       "type": "object",
       "properties": {
-        "email": { "type": "string" },
-        "displayName": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin", "user"] }
-      },
-      "required": ["email", "role"]
+        "primaryFont": { "type": "string" },
+        "secondaryFont": { "type": "string" },
+        "headerTextKa": { "type": "string" },
+        "headerTextEn": { "type": "string" },
+        "headerDescKa": { "type": "string" },
+        "headerDescEn": { "type": "string" },
+        "customFonts": { 
+          "type": "array", 
+          "items": { 
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "data": { "type": "string" }
+            }
+          } 
+        },
+        "logoUrl": { "type": "string" },
+        "titleColor": { "type": "string" },
+        "textColor": { "type": "string" },
+        "buttonColor": { "type": "string" }
+      }
     },
-    "Notification": {
+    "notifications": {
       "title": "Notification",
-      "description": "A notification to display on the main screen",
+      "description": "Global banner notification",
       "type": "object",
       "properties": {
-        "messageKa": { "type": "string", "description": "Message in Georgian" },
-        "messageEn": { "type": "string", "description": "Message in English" },
-        "active": { "type": "boolean", "description": "Whether the notification is active" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["messageKa", "messageEn", "active"]
+        "messageKa": { "type": "string" },
+        "messageEn": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      }
+    },
+    "category": {
+      "title": "Category",
+      "description": "Catalog item category",
+      "type": "object",
+      "properties": {
+        "titleKa": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "icon": { "type": "string" },
+        "order": { "type": "integer" }
+      }
+    },
+    "news": {
+      "title": "News",
+      "description": "News and updates",
+      "type": "object",
+      "properties": {
+        "titleKa": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "contentKa": { "type": "string" },
+        "contentEn": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "sourceUrl": { "type": "string" },
+        "relatedItemId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      }
     }
   },
   "firestore": {
-    "/catalog": {
-      "schema": "CatalogItem",
-      "description": "Collection of catalog items"
-    },
-    "/settings/global": {
-      "schema": "GlobalSettings",
-      "description": "Global settings document"
-    },
-    "/notifications": {
-      "schema": "Notification",
-      "description": "Collection of notifications"
-    },
-    "/users": {
-      "schema": "User",
-      "description": "Collection of user profiles"
-    }
+    "catalog": { "schema": "catalog", "description": "Catalog items" },
+    "categories": { "schema": "category", "description": "Catalog categories" },
+    "settings": { "schema": "settings", "description": "App settings" },
+    "notifications": { "schema": "notifications", "description": "Notifications" },
+    "news": { "schema": "news", "description": "News items" }
   }
 }

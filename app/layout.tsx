@@ -1,20 +1,29 @@
-import type {Metadata} from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
-  title: 'მდგრადი განვითარებისა და ინოვაციების სამსახური',
-  description: 'Service of Sustainable Development and Innovation',
+  title: "Poti.ge",
+  description: "City Directory for Poti",
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="ka">
-      <head>
-        <link rel="stylesheet" href="//cdn.web-fonts.ge/fonts/bpg-glaho-web-caps/css/bpg-glaho-web-caps.min.css" />
-        <link rel="icon" href="https://i.ibb.co/NdQ3Hrnj/logo.png" />
-      </head>
-      <body suppressHydrationWarning className="font-['BPG_Glaho_Web_Caps'] antialiased">
-        {children}
+      <body className={`antialiased font-sans ${inter.className}`}>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

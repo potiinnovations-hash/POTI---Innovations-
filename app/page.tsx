@@ -1,64 +1,70 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy, doc, getDocFromServer, setDoc, getDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType, auth } from '@/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/firebase';
 import { Header } from '@/components/Header';
 import { Catalog, CatalogItem } from '@/components/Catalog';
-import { Footer } from '@/components/Footer';
-import { NotificationBanner } from '@/components/NotificationBanner';
 import { LighthouseBackground } from '@/components/LighthouseBackground';
+import { NotificationBanner } from '@/components/NotificationBanner';
 import { motion } from 'motion/react';
+import { 
+  Plus, Trash2, Save, LogOut, ArrowLeft, Image as ImageIcon, Bell, Settings, 
+  Sparkles, Calendar, UserPlus, MapPin, Phone, Globe, ExternalLink, Mail, Facebook, MessageSquare, Info, ArrowRight,
+  Dumbbell, Trophy, Bus, Car, Plane, Ship, GraduationCap, Book, Waves, Anchor, Fish, Building2, Landmark, Utensils, HeartPulse, Stethoscope, Ticket, Music
+} from 'lucide-react';
+
+const iconMap: Record<string, any> = {
+  Calendar,
+  UserPlus,
+  Info,
+  ArrowRight,
+  ExternalLink,
+  Phone,
+  MapPin,
+  Mail,
+  Facebook,
+  Globe,
+  MessageSquare,
+  ArrowLeft,
+  Dumbbell,
+  Trophy,
+  Bus,
+  Car,
+  Plane,
+  Ship,
+  GraduationCap,
+  Book,
+  Waves,
+  Anchor,
+  Fish,
+  Building2,
+  Landmark,
+  Utensils,
+  HeartPulse,
+  Stethoscope,
+  Ticket,
+  Music
+};
 
 export default function Home() {
   const [lang, setLang] = useState<'ka' | 'en'>('ka');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>({});
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Initialize theme from localStorage on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    if (savedTheme) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTheme(savedTheme);
-    }
+    if (savedTheme) setTheme(savedTheme);
   }, []);
 
   useEffect(() => {
-    async function testConnection() {
-      try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('the client is offline')) {
-          console.error("Please check your Firebase configuration. ");
-        }
-      }
-    }
-    testConnection();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (!userDoc.exists()) {
-          await setDoc(userDocRef, {
-            email: user.email,
-            displayName: user.displayName,
-            role: 'user' // Default role
-          });
-        }
-      }
-    });
-    return () => unsubscribeAuth();
-  }, []);
-
-  useEffect(() => {
-    // Theme handling
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -69,101 +75,203 @@ export default function Home() {
   }, [theme]);
 
   useEffect(() => {
-    // Fetch Catalog
-    const q = query(collection(db, 'catalog'), orderBy('order', 'asc'));
-    const unsubscribeCatalog = onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CatalogItem));
-      setCatalogItems(items);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'catalog');
-    });
-
-    // Fetch Settings
-    const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'global'), (doc) => {
-      if (doc.exists()) {
-        setSettings(doc.data());
+    const qCatalog = query(collection(db, 'catalog'), orderBy('order', 'asc'));
+    const unsubscribeCatalog = onSnapshot(
+      qCatalog, 
+      (snapshot) => {
+        setCatalogItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CatalogItem)));
+        setLoading(false);
+      },
+      (error) => {
+        setLoading(false);
+        handleFirestoreError(error, OperationType.LIST, 'catalog');
       }
-    }, (error) => {
-      handleFirestoreError(error, OperationType.GET, 'settings/global');
-    });
+    );
 
-    // Fetch Notifications
-    const unsubscribeNotifications = onSnapshot(collection(db, 'notifications'), (snapshot) => {
-      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setNotifications(items);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'notifications');
-    });
+    const unsubscribeSettings = onSnapshot(
+      doc(db, 'settings', 'global'), 
+      (doc) => {
+        if (doc.exists()) setSettings(doc.data());
+      },
+      (error) => {
+        setLoading(false);
+        handleFirestoreError(error, OperationType.GET, 'settings/global');
+      }
+    );
+
+    const unsubscribeNotifs = onSnapshot(
+      collection(db, 'notifications'), 
+      (snapshot) => {
+        setNotifications(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      },
+      (error) => {
+        setLoading(false);
+        handleFirestoreError(error, OperationType.LIST, 'notifications');
+      }
+    );
+
+    const unsubscribeCategories = onSnapshot(
+      query(collection(db, 'categories'), orderBy('order', 'asc')),
+      (snapshot) => {
+        setCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'categories');
+      }
+    );
 
     return () => {
       unsubscribeCatalog();
       unsubscribeSettings();
-      unsubscribeNotifications();
+      unsubscribeNotifs();
+      unsubscribeCategories();
     };
   }, []);
 
-  const activeNotification = notifications.find(n => n.active);
+  useEffect(() => {
+    const scrollEl = document.getElementById('category-scroll');
+    if (!scrollEl) return;
+
+    const handleScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollEl;
+      const total = scrollWidth - clientWidth;
+      if (total <= 1) { // 1px threshold for stability
+        setScrollProgress(0);
+        return;
+      }
+      setScrollProgress(scrollLeft / total);
+    };
+
+    scrollEl.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    return () => scrollEl.removeEventListener('scroll', handleScroll);
+  }, [categories, loading]);
+
+  const filteredItems = catalogItems.filter(item => {
+    const title = lang === 'ka' ? item.titleKa : item.titleEn;
+    const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategoryId ? item.categoryId === selectedCategoryId : true;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <main className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-500">
       <LighthouseBackground />
       
-      {activeNotification && (
-        <NotificationBanner
-          messageKa={activeNotification.messageKa}
-          messageEn={activeNotification.messageEn}
-          lang={lang}
-          active={activeNotification.active}
-        />
-      )}
-
-      <Header
-        lang={lang}
-        setLang={setLang}
-        theme={theme}
-        setTheme={setTheme}
+      <Header 
+        lang={lang} 
+        setLang={setLang} 
+        theme={theme} 
+        setTheme={setTheme} 
         settings={settings}
       />
 
-      <div className="container mx-auto px-4 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-20"
-        >
-          <h1 
-            className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-sm max-w-4xl mx-auto"
-            style={{ color: settings?.primaryColor || undefined }}
-          >
-            {lang === 'ka' 
-              ? (settings?.pageTitleKa || settings?.siteTitleKa || 'მდგრადი განვითარებისა და ინოვაციების სამსახური') 
-              : (settings?.pageTitleEn || settings?.siteTitleEn || 'Service of Sustainable Development and Innovation')}
-          </h1>
-          <p 
-            className="text-lg max-w-2xl mx-auto font-medium"
-            style={{ color: settings?.accentColor || undefined }}
-          >
-            {lang === 'ka' 
-              ? (settings?.siteDescriptionKa || 'ინოვაციური გადაწყვეტილებები მდგრადი მომავლისთვის. გაეცანით ჩვენს კატალოგს.') 
-              : (settings?.siteDescriptionEn || 'Innovative solutions for a sustainable future. Explore our catalog.')}
-          </p>
-        </motion.div>
+      <NotificationBanner notifications={notifications} lang={lang} />
 
-        {catalogItems.length > 0 ? (
-          <Catalog items={catalogItems} lang={lang} itemsPerRow={settings?.itemsPerRow} />
-        ) : (
-          <div className="text-center py-20 bg-blue-50 dark:bg-slate-900 rounded-3xl border-2 border-dashed border-blue-200 dark:border-slate-800">
-             <p className="text-blue-400">
-               {lang === 'ka' ? 'კატალოგი ცარიელია' : 'Catalog is empty'}
-             </p>
+      {/* Hero Section */}
+      <section className="relative pt-12 pb-20 px-4 overflow-hidden">
+        <div className="container mx-auto text-center relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-black text-blue-950 dark:text-white leading-[1] mb-4 tracking-tighter"
+            >
+              {lang === 'ka' ? (
+                settings?.headerTextKa ? (
+                  <span>{settings.headerTextKa}</span>
+                ) : (
+                  <>აღმოაჩინე <br/><span className="text-primary">შენი ქალაქი</span></>
+                )
+              ) : (
+                settings?.headerTextEn ? (
+                  <span>{settings.headerTextEn}</span>
+                ) : (
+                  <>DISCOVER <br/><span className="text-primary">YOUR CITY</span></>
+                )
+              )}
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="font-bold text-lg md:text-xl mb-12"
+              style={{ color: settings?.textColor || '#64748b' }}
+            >
+              {lang === 'ka' ? (
+                settings?.headerDescKa || 'ყველაფერი რაც გჭირდება ერთ სივრცეში'
+              ) : (
+                settings?.headerDescEn || 'Everything you need in one simplified space'
+              )}
+            </motion.p>
           </div>
-        )}
-      </div>
 
-      <Footer
-        settings={settings}
-        lang={lang}
-      />
+          {/* Categories Row */}
+          <div className="relative group max-w-5xl mx-auto mt-12 px-4 md:px-12">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar touch-pan-x"
+              id="category-scroll"
+            >
+              <button 
+                onClick={() => setSelectedCategoryId(null)}
+                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${!selectedCategoryId ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
+              >
+                <Globe size={18} />
+                {lang === 'ka' ? 'ყველა' : 'All'}
+              </button>
+              {categories.map(cat => (
+                <button 
+                  key={cat.id}
+                  onClick={() => setSelectedCategoryId(cat.id)}
+                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${selectedCategoryId === cat.id ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
+                >
+                  {iconMap[cat.icon] ? React.createElement(iconMap[cat.icon], { size: 18 }) : <Globe size={18} />}
+                  {lang === 'ka' ? cat.titleKa : cat.titleEn}
+                </button>
+              ))}
+            </motion.div>
+
+            {/* Pagination Pins */}
+            <div className="flex justify-center gap-1.5 mt-6">
+              {[...Array(5)].map((_, i) => {
+                const step = 1 / 4;
+                const progressTarget = i * step;
+                const active = Math.abs(scrollProgress - progressTarget) < step / 2;
+                return (
+                  <button 
+                    key={i}
+                    onClick={() => {
+                      const scrollEl = document.getElementById('category-scroll');
+                      if (scrollEl) {
+                        const { scrollWidth, clientWidth } = scrollEl;
+                        const total = scrollWidth - clientWidth;
+                        scrollEl.scrollTo({ left: progressTarget * total, behavior: 'smooth' });
+                      }
+                    }}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${active ? 'w-6 bg-primary' : 'w-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Catalog Section */}
+      <section className="container mx-auto px-4 pb-24">
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <Catalog items={filteredItems} lang={lang} itemsPerRow={4} settings={settings} />
+        )}
+      </section>
+
     </main>
   );
 }

@@ -1,18 +1,26 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+:root {
+  --primary-color: #2563eb;
+  --secondary-color: #64748b;
+  --font-primary: 'Inter', sans-serif;
+  --font-secondary: 'Inter', sans-serif;
 }
 
-/* Enable class-based dark mode for Tailwind v4 */
-@variant dark (&:where(.dark, .dark *));
-
 @layer base {
-  :root {
-    color-scheme: light;
+  body {
+    @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100;
   }
-  .dark {
-    color-scheme: dark;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
