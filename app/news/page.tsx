@@ -24,7 +24,7 @@ function NewsContent() {
 
   useEffect(() => {
     // Initial loading delay
-    const minLoadTime = new Promise(resolve => setTimeout(resolve, 400));
+    const minLoadTime = new Promise(resolve => setTimeout(resolve, 800));
     
     if (settingsLoaded) {
       minLoadTime.then(() => {

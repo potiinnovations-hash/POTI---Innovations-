@@ -65,7 +65,7 @@ export default function Home() {
 
   useEffect(() => {
     // Initial loading delay to ensure smooth transition
-    const minLoadTime = new Promise(resolve => setTimeout(resolve, 400));
+    const minLoadTime = new Promise(resolve => setTimeout(resolve, 800));
     
     // When settings load, we still wait for fonts to potentially initialize
     if (settingsLoaded) {

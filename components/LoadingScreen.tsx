@@ -79,8 +79,8 @@ export default function LoadingScreen() {
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 0.9, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-xs font-black uppercase tracking-[0.2em] text-blue-900 dark:text-blue-100"
+          transition={{ delay: 0.3 }}
+          className="text-lg font-black tracking-tight text-blue-900 dark:text-blue-100"
         >
           ტალღები იტვირთება
         </motion.p>

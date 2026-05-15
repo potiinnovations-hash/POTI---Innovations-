@@ -1,4 +1,4 @@
-const CACHE_NAME = 'poti-v3';
+const CACHE_NAME = 'poti-v2';
 const ASSETS = [
   '/',
   '/manifest.json',
