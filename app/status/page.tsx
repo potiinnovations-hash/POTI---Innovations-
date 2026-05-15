@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/Header';
+import Footer from '@/components/Footer';
+import LoadingScreen from '@/components/LoadingScreen';
 import { 
   Droplets, 
   Flame, 
@@ -42,6 +44,8 @@ export default function StatusHubPage() {
   const [activeService, setActiveService] = useState<ServiceType>('power');
   const [outages, setOutages] = useState<Outage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [fullPageLoading, setFullPageLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -51,14 +55,53 @@ export default function StatusHubPage() {
   const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
+    // Initial loading delay
+    const minLoadTime = new Promise(resolve => setTimeout(resolve, 400));
+    
+    if (settingsLoaded) {
+      minLoadTime.then(() => {
+        setFullPageLoading(false);
+      });
+    }
+  }, [settingsLoaded]);
+
+  useEffect(() => {
+    // Inject custom fonts from settings
+    if (settings?.customFonts) {
+      const styleId = 'global-dynamic-fonts';
+      let styleEl = document.getElementById(styleId);
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        document.head.appendChild(styleEl);
+      }
+      let content = '';
+      settings.customFonts.forEach((f: any) => {
+        content += `@font-face { font-family: '${f.name}'; src: url(${f.data}); font-display: swap; }\n`;
+      });
+      styleEl.textContent = content;
+    }
+    
+    if (settings?.fontFamily) {
+      document.body.style.fontFamily = settings.fontFamily;
+    }
+  }, [settings]);
+
+  useEffect(() => {
     const savedLang = localStorage.getItem('lang') as 'ka' | 'en';
     if (savedLang) setLang(savedLang);
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
     if (savedTheme) setTheme(savedTheme);
 
     const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'global'), (d) => {
-      if (d.exists()) setSettings(d.data());
+      if (d.exists()) {
+        setSettings(d.data());
+        setSettingsLoaded(true);
+      } else {
+        setSettingsLoaded(true);
+      }
     }, (err) => {
+      setSettingsLoaded(true);
       handleFirestoreError(err, OperationType.GET, 'settings/global');
     });
 
@@ -156,116 +199,128 @@ export default function StatusHubPage() {
   ] as const;
 
   return (
-    <div className={`min-h-screen font-sans ${theme === 'dark' ? 'dark bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
-      <Header 
-        lang={lang} 
-        setLang={setLang} 
-        theme={theme} 
-        setTheme={setTheme} 
-        settings={settings} 
-      />
+    <AnimatePresence mode="wait">
+      {fullPageLoading ? (
+        <LoadingScreen key="loading" />
+      ) : (
+        <motion.div 
+          key="content"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className={`min-h-screen font-sans ${theme === 'dark' ? 'dark bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}
+        >
+          <Header 
+            lang={lang} 
+            setLang={setLang} 
+            theme={theme} 
+            setTheme={setTheme} 
+            settings={settings} 
+          />
 
-      <main className="container mx-auto px-4 py-8 lg:py-12 max-w-6xl">
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* Sidebar / Categories */}
-          <aside className="lg:w-80 shrink-0">
-            <div className="sticky top-24 space-y-6">
-              <div>
-                <h1 className="text-3xl font-black tracking-tight mb-2">
-                  {lang === 'ka' ? 'მუნიციპალური' : 'Municipal'} <span className="text-blue-600">{lang === 'ka' ? 'სერვისები' : 'Services'}</span>
-                </h1>
-                <p className="text-slate-500 font-bold text-sm">
-                  {lang === 'ka' ? 'შეიტყვეთ დაგეგმილი სამუშაოების შესახებ' : 'Stay updated on planned maintenance and outages'}
-                </p>
-              </div>
+          <main className="container mx-auto px-4 py-8 lg:py-12 max-w-6xl">
+            <div className="flex flex-col lg:flex-row gap-8">
+              
+              {/* Sidebar / Categories */}
+              <aside className="lg:w-80 shrink-0">
+                <div className="sticky top-24 space-y-6">
+                  <div>
+                    <h1 className="text-3xl font-black tracking-tight mb-2">
+                      {lang === 'ka' ? 'მუნიციპალური' : 'Municipal'} <span className="text-blue-600">{lang === 'ka' ? 'სერვისები' : 'Services'}</span>
+                    </h1>
+                    <p className="text-slate-500 font-bold text-sm">
+                      {lang === 'ka' ? 'შეიტყვეთ დაგეგმილი სამუშაოების შესახებ' : 'Stay updated on planned maintenance and outages'}
+                    </p>
+                  </div>
 
-              <nav className="flex flex-col gap-2 p-2 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                {services.map((service) => (
-                  <motion.button
-                    key={service.id}
-                    whileTap={{ scale: 0.98 }}
-                    onTap={() => setActiveService(service.id)}
-                    className={`flex items-center justify-between p-4 rounded-2xl transition-all font-black text-sm uppercase tracking-tight group ${activeService === service.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-100 dark:shadow-none' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <service.icon size={20} className={activeService === service.id ? 'text-white' : 'text-blue-500'} />
-                      {service.label}
+                  <nav className="flex flex-col gap-2 p-2 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
+                    {services.map((service) => (
+                      <motion.button
+                        key={service.id}
+                        whileTap={{ scale: 0.98 }}
+                        onTap={() => setActiveService(service.id)}
+                        className={`flex items-center justify-between p-4 rounded-2xl transition-all font-black text-sm uppercase tracking-tight group ${activeService === service.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-100 dark:shadow-none' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <service.icon size={20} className={activeService === service.id ? 'text-white' : 'text-blue-500'} />
+                          {service.label}
+                        </div>
+                        <ChevronRight size={16} className={`opacity-0 group-hover:opacity-100 transition-opacity ${activeService === service.id ? 'text-white' : 'text-slate-300'}`} />
+                      </motion.button>
+                    ))}
+                  </nav>
+
+                  <div className="p-6 bg-slate-100 dark:bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-2 text-slate-400 mb-3 uppercase font-black text-[10px] tracking-widest">
+                      <span className="flex items-center gap-2"><Info size={14} />{lang === 'ka' ? 'ინფორმაცია' : 'Information'}</span>
                     </div>
-                    <ChevronRight size={16} className={`opacity-0 group-hover:opacity-100 transition-opacity ${activeService === service.id ? 'text-white' : 'text-slate-300'}`} />
-                  </motion.button>
-                ))}
-              </nav>
-
-              <div className="p-6 bg-slate-100 dark:bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2 text-slate-400 mb-3 uppercase font-black text-[10px] tracking-widest">
-                  <Info size={14} />
-                  {lang === 'ka' ? 'ინფორმაცია' : 'Information'}
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
+                      {lang === 'ka' 
+                        ? 'მონაცემები ავტომატურად ახლდება ყოველ 60 წუთში შესაბამისი სერვის-პროვაიდერების ბაზებიდან.' 
+                        : 'Data is automatically updated every 60 minutes from respective service provider databases.'}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
-                  {lang === 'ka' 
-                    ? 'მონაცემები ავტომატურად ახლდება ყოველ 60 წუთში შესაბამისი სერვის-პროვაიდერების ბაზებიდან.' 
-                    : 'Data is automatically updated every 60 minutes from respective service provider databases.'}
-                </p>
+              </aside>
+
+              {/* Main Content Area */}
+              <div className="flex-1 min-w-0">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeService}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="space-y-8"
+                  >
+                    {/* Section Header */}
+                    <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 text-blue-500">
+                          {services.find(s => s.id === activeService)?.icon && React.createElement(services.find(s => s.id === activeService)!.icon, { size: 24 })}
+                          <span className="font-black uppercase tracking-widest text-xs">{services.find(s => s.id === activeService)?.provider}</span>
+                        </div>
+                        <h2 className="text-3xl font-black tracking-tight">{services.find(s => s.id === activeService)?.label}</h2>
+                      </div>
+
+                      {activeService === 'power' && (
+                        <button 
+                          onClick={() => fetchOutages()}
+                          disabled={loading}
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 transition-all font-black text-[10px] uppercase tracking-widest text-slate-600 dark:text-slate-400"
+                        >
+                          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                          {lang === 'ka' ? 'განახლება' : 'Refresh'}
+                        </button>
+                      )}
+                    </header>
+
+                    <div className="h-px bg-slate-200 dark:bg-slate-800" />
+
+                    {error && (
+                      <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400 font-bold">
+                        <AlertTriangle size={20} />
+                        {error}
+                      </div>
+                    )}
+
+                    {/* Content */}
+                    <div className="space-y-12">
+                      {activeService === 'power' ? (
+                        <PowerSection outages={outages} loading={loading} lang={lang} lastChecked={lastChecked} />
+                      ) : (
+                        <PlaceholderSection service={activeService} lang={lang} />
+                      )}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </div>
-          </aside>
-
-          {/* Main Content Area */}
-          <div className="flex-1 min-w-0">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeService}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="space-y-8"
-              >
-                {/* Section Header */}
-                <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2 text-blue-500">
-                      {services.find(s => s.id === activeService)?.icon && React.createElement(services.find(s => s.id === activeService)!.icon, { size: 24 })}
-                      <span className="font-black uppercase tracking-widest text-xs">{services.find(s => s.id === activeService)?.provider}</span>
-                    </div>
-                    <h2 className="text-3xl font-black tracking-tight">{services.find(s => s.id === activeService)?.label}</h2>
-                  </div>
-
-                  {activeService === 'power' && (
-                    <button 
-                      onClick={() => fetchOutages()}
-                      disabled={loading}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 transition-all font-black text-[10px] uppercase tracking-widest text-slate-600 dark:text-slate-400"
-                    >
-                      <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                      {lang === 'ka' ? 'განახლება' : 'Refresh'}
-                    </button>
-                  )}
-                </header>
-
-                <div className="h-px bg-slate-200 dark:bg-slate-800" />
-
-                {error && (
-                  <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400 font-bold">
-                    <AlertTriangle size={20} />
-                    {error}
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="space-y-12">
-                  {activeService === 'power' ? (
-                    <PowerSection outages={outages} loading={loading} lang={lang} lastChecked={lastChecked} />
-                  ) : (
-                    <PlaceholderSection service={activeService} lang={lang} />
-                  )}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-      </main>
-    </div>
+          </main>
+          <Footer lang={lang} />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

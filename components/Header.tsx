@@ -63,10 +63,12 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
                 referrerPolicy="no-referrer"
               />
             </div>
-          ) : (
+          ) : settings ? (
             <span className="text-2xl font-black text-blue-900 dark:text-blue-100 tracking-tighter">
               POTI<span className="text-blue-500">.GE</span>
             </span>
+          ) : (
+            <div className="h-8 w-24 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />
           )}
         </Link>
 
