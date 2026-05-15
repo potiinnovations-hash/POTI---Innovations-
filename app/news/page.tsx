@@ -89,7 +89,11 @@ function NewsContent() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
               key={item.id}
-              className="group bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-blue-50 dark:border-slate-800"
+              whileTap={{ scale: 0.995 }}
+              onTap={() => {
+                if (item.sourceUrl) window.open(item.sourceUrl, '_blank');
+              }}
+              className={`group bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-blue-50 dark:border-slate-800 ${item.sourceUrl ? 'cursor-pointer' : ''}`}
             >
               <div className="relative aspect-video overflow-hidden">
                 <Image 

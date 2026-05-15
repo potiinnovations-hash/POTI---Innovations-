@@ -216,22 +216,24 @@ export default function Home() {
               className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar touch-pan-x"
               id="category-scroll"
             >
-              <button 
-                onClick={() => setSelectedCategoryId(null)}
+              <motion.button 
+                whileTap={{ scale: 0.95 }}
+                onTap={() => setSelectedCategoryId(null)}
                 className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${!selectedCategoryId ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
               >
                 <Globe size={18} />
                 {lang === 'ka' ? 'ყველა' : 'All'}
-              </button>
+              </motion.button>
               {categories.map(cat => (
-                <button 
+                <motion.button 
                   key={cat.id}
-                  onClick={() => setSelectedCategoryId(cat.id)}
+                  whileTap={{ scale: 0.95 }}
+                  onTap={() => setSelectedCategoryId(cat.id)}
                   className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${selectedCategoryId === cat.id ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
                 >
                   {iconMap[cat.icon] ? React.createElement(iconMap[cat.icon], { size: 18 }) : <Globe size={18} />}
                   {lang === 'ka' ? cat.titleKa : cat.titleEn}
-                </button>
+                </motion.button>
               ))}
             </motion.div>
 

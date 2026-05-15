@@ -158,48 +158,56 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
                 <WeatherWidget lang={lang} />
               </div>
 
-              <Link 
-                href="/status"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
-              >
-                <Settings size={18} className="text-blue-500" /> {lang === 'ka' ? 'სერვისები' : 'Services'}
-              </Link>
+              <motion.div whileTap={{ scale: 0.98 }}>
+                <Link 
+                  href="/status"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
+                >
+                  <Settings size={18} className="text-blue-500" /> {lang === 'ka' ? 'სერვისები' : 'Services'}
+                </Link>
+              </motion.div>
 
-              <Link 
-                href="/news"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
-              >
-                <div className="flex items-center gap-3"><Bell size={18} /> {lang === 'ka' ? 'სიახლეები' : 'News'}</div>
-                {unreadCount > 0 && (
-                  <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">{unreadCount}</span>
-                )}
-              </Link>
+              <motion.div whileTap={{ scale: 0.98 }}>
+                <Link 
+                  href="/news"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
+                >
+                  <div className="flex items-center gap-3"><Bell size={18} /> {lang === 'ka' ? 'სიახლეები' : 'News'}</div>
+                  {unreadCount > 0 && (
+                    <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">{unreadCount}</span>
+                  )}
+                </Link>
+              </motion.div>
 
-              <button 
-                onClick={() => { setLang(lang === 'ka' ? 'en' : 'ka'); setIsMenuOpen(false); }}
+              <motion.button 
+                whileTap={{ scale: 0.98 }}
+                onTap={() => { setLang(lang === 'ka' ? 'en' : 'ka'); setIsMenuOpen(false); }}
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
               >
                 <div className="flex items-center gap-3"><Languages size={18} /> {lang === 'ka' ? 'ენა' : 'Language'}</div>
                 <span className="text-blue-600">{lang === 'ka' ? 'ENGLISH' : 'ქართული'}</span>
-              </button>
+              </motion.button>
               
-              <button 
-                onClick={() => { setTheme(theme === 'light' ? 'dark' : 'light'); setIsMenuOpen(false); }}
+              <motion.button 
+                whileTap={{ scale: 0.98 }}
+                onTap={() => { setTheme(theme === 'light' ? 'dark' : 'light'); setIsMenuOpen(false); }}
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
               >
                 <div className="flex items-center gap-3">{theme === 'light' ? <Moon size={18} /> : <Sun size={18} />} {lang === 'ka' ? 'თემა' : 'Theme'}</div>
                 <span className="text-blue-600 uppercase">{theme}</span>
-              </button>
+              </motion.button>
 
-              <Link 
-                href="/admin" 
-                onClick={() => setIsMenuOpen(false)}
-                className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold text-center shadow-lg"
-              >
-                {lang === 'ka' ? 'ადმინ პანელი' : 'Admin Panel'}
-              </Link>
+              <motion.div whileTap={{ scale: 0.98 }}>
+                <Link 
+                  href="/admin" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block w-full py-4 rounded-xl bg-blue-600 text-white font-bold text-center shadow-lg"
+                >
+                  {lang === 'ka' ? 'ადმინ პანელი' : 'Admin Panel'}
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         )}

@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/Header';
 import { 
-  Bolt, 
   Droplets, 
   Flame, 
   Construction, 
@@ -128,8 +127,8 @@ export default function StatusHubPage() {
   const services = [
     { 
       id: 'power', 
-      label: lang === 'ka' ? 'ელექტროენერგია' : 'Electricity', 
-      icon: Bolt, 
+      label: lang === 'ka' ? 'ელექტრო ენერგია' : 'Electricity', 
+      icon: Lightbulb, 
       color: 'blue', 
       provider: 'Energo-Pro' 
     },
@@ -183,9 +182,10 @@ export default function StatusHubPage() {
 
               <nav className="flex flex-col gap-2 p-2 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
                 {services.map((service) => (
-                  <button
+                  <motion.button
                     key={service.id}
-                    onClick={() => setActiveService(service.id)}
+                    whileTap={{ scale: 0.98 }}
+                    onTap={() => setActiveService(service.id)}
                     className={`flex items-center justify-between p-4 rounded-2xl transition-all font-black text-sm uppercase tracking-tight group ${activeService === service.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-100 dark:shadow-none' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                   >
                     <div className="flex items-center gap-3">
@@ -193,7 +193,7 @@ export default function StatusHubPage() {
                       {service.label}
                     </div>
                     <ChevronRight size={16} className={`opacity-0 group-hover:opacity-100 transition-opacity ${activeService === service.id ? 'text-white' : 'text-slate-300'}`} />
-                  </button>
+                  </motion.button>
                 ))}
               </nav>
 

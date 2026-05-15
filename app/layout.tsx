@@ -11,6 +11,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Poti.ge",
   description: "City Directory for Poti",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({
