@@ -31,15 +31,18 @@ jobs:
 
       - name: Prepare Deployment Files
         run: |
-          # 1. Copy the critical client-side static assets and public assets into the standalone folder
+          # 1. Run the Passenger and cPanel port-patch on the built server.js
+          node patch-server.js
+
+          # 2. Copy the critical client-side static assets and public assets into the standalone folder
           cp -r public .next/standalone/
           cp -r .next/static .next/standalone/.next/
           
-          # 2. Copy deployment configurations so they land in public_html root on checkout
+          # 3. Copy deployment configurations so they land in public_html root on checkout
           cp .htaccess .next/standalone/
           cp .cpanel.yml .next/standalone/
 
-          # 3. Write a production-specific .gitignore so git preserves the standalone folders
+          # 4. Write a production-specific .gitignore so git preserves the standalone folders
           cat << 'EOF' > .next/standalone/.gitignore
           .env*.local
           .env
