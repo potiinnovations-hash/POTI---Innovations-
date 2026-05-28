@@ -31,15 +31,16 @@ jobs:
 
       - name: Prepare Deployment Files
         run: |
-          # Create a temp directory for build package
-          mkdir deploy-dist
+          # 1. Copy the critical client-side static assets and public assets into the standalone folder
+          cp -r public .next/standalone/
+          cp -r .next/static .next/standalone/.next/
           
-          # Copy all recursive files except node_modules and git directories
-          rsync -av --exclude='node_modules' --exclude='.git' --exclude='.github' --exclude='deploy-dist' ./ ./deploy-dist/
-          
-          # Write custom .gitignore for production branch so .next folder gets preserved and pushed
-          cat << 'EOF' > ./deploy-dist/.gitignore
-          node_modules
+          # 2. Copy deployment configurations so they land in public_html root on checkout
+          cp .htaccess .next/standalone/
+          cp .cpanel.yml .next/standalone/
+
+          # 3. Write a production-specific .gitignore so git preserves the standalone folders
+          cat << 'EOF' > .next/standalone/.gitignore
           .env*.local
           .env
           EOF
@@ -47,6 +48,6 @@ jobs:
       - name: Deploy to production branch
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: deploy-dist
+          folder: .next/standalone
           branch: production
           clean: true
