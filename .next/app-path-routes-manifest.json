@@ -3,8 +3,8 @@
   "/api/power/route": "/api/power",
   "/admin/page": "/admin",
   "/item/[id]/page": "/item/[id]",
-  "/cal/page": "/cal",
   "/news/page": "/news",
-  "/status/page": "/status",
-  "/page": "/"
+  "/page": "/",
+  "/cal/page": "/cal",
+  "/status/page": "/status"
 }

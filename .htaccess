@@ -1,0 +1,21 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# cPanel Phusion Passenger Configuration for Next.js
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PassengerEnabled on
+PassengerAppEnv production
+PassengerAppRoot /home/poti/public_html
+PassengerBaseURI /
+PassengerAppType node
+PassengerStartupFile server.js
+
+# Ensure Apache serves via our Next.js custom server
+DirectoryIndex server.js
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^server.js$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ server.js/$1 [QSA,L]
+</IfModule>
