@@ -1,0 +1,113 @@
+{
+  "entities": {
+    "catalog": {
+      "title": "Catalog Item",
+      "description": "Item in the city directory",
+      "type": "object",
+      "properties": {
+        "titleKa": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "descriptionKa": { "type": "string" },
+        "descriptionEn": { "type": "string" },
+        "targetUrl": { "type": "string" },
+        "redirectDirectly": { "type": "boolean" },
+        "phone": { "type": "string" },
+        "price": { "type": "string" },
+        "priceEn": { "type": "string" },
+        "location": { "type": "string" },
+        "addressKa": { "type": "string" },
+        "addressEn": { "type": "string" },
+        "workHours": { "type": "string" },
+        "gallery": { "type": "array", "items": { "type": "string" } },
+        "facebookUrl": { "type": "string" },
+        "facebookName": { "type": "string" },
+        "email": { "type": "string" },
+        "showWebsite": { "type": "boolean" },
+        "ctaButton": {
+          "type": "object",
+          "properties": {
+            "textKa": { "type": "string" },
+            "textEn": { "type": "string" },
+            "url": { "type": "string" },
+            "icon": { "type": "string" }
+          }
+        },
+        "order": { "type": "integer" },
+        "isUnderDevelopment": { "type": "boolean" }
+      }
+    },
+    "settings": {
+      "title": "Global Settings",
+      "description": "App-wide configuration",
+      "type": "object",
+      "properties": {
+        "primaryFont": { "type": "string" },
+        "secondaryFont": { "type": "string" },
+        "headerTextKa": { "type": "string" },
+        "headerTextEn": { "type": "string" },
+        "headerDescKa": { "type": "string" },
+        "headerDescEn": { "type": "string" },
+        "customFonts": { 
+          "type": "array", 
+          "items": { 
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "data": { "type": "string" }
+            }
+          } 
+        },
+        "logoUrl": { "type": "string" },
+        "titleColor": { "type": "string" },
+        "textColor": { "type": "string" },
+        "buttonColor": { "type": "string" }
+      }
+    },
+    "notifications": {
+      "title": "Notification",
+      "description": "Global banner notification",
+      "type": "object",
+      "properties": {
+        "messageKa": { "type": "string" },
+        "messageEn": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      }
+    },
+    "category": {
+      "title": "Category",
+      "description": "Catalog item category",
+      "type": "object",
+      "properties": {
+        "titleKa": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "icon": { "type": "string" },
+        "order": { "type": "integer" }
+      }
+    },
+    "news": {
+      "title": "News",
+      "description": "News and updates",
+      "type": "object",
+      "properties": {
+        "titleKa": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "contentKa": { "type": "string" },
+        "contentEn": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "sourceUrl": { "type": "string" },
+        "relatedItemId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "catalog": { "schema": "catalog", "description": "Catalog items" },
+    "categories": { "schema": "category", "description": "Catalog categories" },
+    "settings": { "schema": "settings", "description": "App settings" },
+    "notifications": { "schema": "notifications", "description": "Notifications" },
+    "news": { "schema": "news", "description": "News items" }
+  }
+}

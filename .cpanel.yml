@@ -1,0 +1,8 @@
+---
+deployment:
+  tasks:
+    # IMPORTANT: Keep /home/poti/public_html as target deployment directory
+    - export DEPLOYPATH=/home/poti/public_html
+    - /bin/rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' ./ $DEPLOYPATH
+    - cd $DEPLOYPATH
+    - npm install --production

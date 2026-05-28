@@ -1,0 +1,35 @@
+{
+  "name": "poti-ge",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@google/generative-ai": "latest",
+    "@vis.gl/react-google-maps": "^1.8.3",
+    "clsx": "^2.1.1",
+    "firebase": "^11.0.1",
+    "lucide-react": "^0.454.0",
+    "motion": "^12.38.0",
+    "next": "^15.5.18",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tailwind-merge": "^2.5.4"
+  },
+  "devDependencies": {
+    "@firebase/eslint-plugin-security-rules": "latest",
+    "@types/node": "^20.17.6",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "^15.5.18",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3"
+  }
+}
