@@ -101,7 +101,7 @@ export const SettingsTab = ({
                          const base64 = await handleImageUpload(file);
                          setGlobalSettings({ ...globalSettings, logoUrl: base64 });
                        } catch (err) {
-                         console.error("Logo upload failed", err);
+                         console.error("Logo upload failed", err instanceof Error ? err.message : String(err));
                        }
                        e.target.value = '';
                      }

@@ -61,7 +61,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
   useEffect(() => {
     // Initial loading delay to ensure smooth transition
-    const minLoadTime = new Promise(resolve => setTimeout(resolve, 800));
+    const minLoadTime = new Promise(resolve => setTimeout(resolve, 200));
     
     // When settings load and item data is fetched, we still wait for minimum delay
     if (settingsLoaded && !loading) {

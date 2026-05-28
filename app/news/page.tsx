@@ -24,7 +24,7 @@ function NewsContent() {
 
   useEffect(() => {
     // Initial loading delay
-    const minLoadTime = new Promise(resolve => setTimeout(resolve, 800));
+    const minLoadTime = new Promise(resolve => setTimeout(resolve, 200));
     
     if (settingsLoaded) {
       minLoadTime.then(() => {
@@ -143,7 +143,7 @@ function NewsContent() {
                   transition={{ delay: idx * 0.1 }}
                   key={item.id}
                   whileTap={{ scale: 0.995 }}
-                  onTap={() => {
+                  onClick={() => {
                     if (item.sourceUrl) window.open(item.sourceUrl, '_blank');
                   }}
                   className={`group bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-blue-50 dark:border-slate-800 ${item.sourceUrl ? 'cursor-pointer' : ''}`}

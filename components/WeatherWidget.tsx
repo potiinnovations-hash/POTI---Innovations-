@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, Sun, CloudSun, Calendar } from 'lucide-react';
+import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, Sun, CloudSun, ChevronRight } from 'lucide-react';
 
 interface WeatherData {
   today: {
@@ -49,25 +49,30 @@ export const WeatherWidget = ({ lang }: WeatherWidgetProps) => {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=42.1461&longitude=41.6720&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto');
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=42.1461&longitude=41.6720&daily=temperature_2m_max,temperature_2m_min,weather_code,weathercode&timezone=auto');
+        if (!res.ok) throw new Error(`Weather API returned ${res.status}`);
         const data = await res.json();
         
         if (data.daily) {
+          const weatherCodes = data.daily.weather_code || data.daily.weathercode || [];
+          const maxTemp = data.daily.temperature_2m_max || [0, 0];
+          const minTemp = data.daily.temperature_2m_min || [0, 0];
+          
           setWeather({
             today: {
-              max: Math.round(data.daily.temperature_2m_max[0]),
-              min: Math.round(data.daily.temperature_2m_min[0]),
-              code: data.daily.weathercode[0],
+              max: Math.round(maxTemp[0] !== undefined ? maxTemp[0] : 0),
+              min: Math.round(minTemp[0] !== undefined ? minTemp[0] : 0),
+              code: weatherCodes[0] !== undefined ? weatherCodes[0] : 0,
             },
             tomorrow: {
-              max: Math.round(data.daily.temperature_2m_max[1]),
-              min: Math.round(data.daily.temperature_2m_min[1]),
-              code: data.daily.weathercode[1],
+              max: Math.round(maxTemp[1] !== undefined ? maxTemp[1] : 0),
+              min: Math.round(minTemp[1] !== undefined ? minTemp[1] : 0),
+              code: weatherCodes[1] !== undefined ? weatherCodes[1] : 0,
             }
           });
         }
       } catch (error) {
-        console.error('Failed to fetch weather:', error);
+        console.error('Failed to fetch weather:', error instanceof Error ? error.message : String(error));
       }
     };
 
@@ -107,7 +112,7 @@ export const WeatherWidget = ({ lang }: WeatherWidgetProps) => {
         className={`p-2 rounded-xl transition-all ${showTomorrow ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
         title={lang === 'ka' ? (showTomorrow ? 'ჩვენება დღეს' : 'ჩვენება ხვალ') : (showTomorrow ? 'Show Today' : 'Show Tomorrow')}
       >
-        <Calendar size={18} />
+        <ChevronRight size={18} className={`transition-transform duration-300 ${showTomorrow ? 'rotate-180' : ''}`} />
       </button>
     </div>
   );

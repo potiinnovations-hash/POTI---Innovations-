@@ -20,6 +20,7 @@ import { NewsTab } from '@/components/admin/NewsTab';
 import { NotificationsTab } from '@/components/admin/NotificationsTab';
 import { CategoriesTab } from '@/components/admin/CategoriesTab';
 import { SettingsTab } from '@/components/admin/SettingsTab';
+import { CalendarTab } from '@/components/admin/CalendarTab';
 
 const iconMap: Record<string, any> = {
   Calendar,
@@ -62,12 +63,13 @@ export default function AdminPage() {
   const [globalSettings, setGlobalSettings] = useState<any>({});
   const [notifications, setNotifications] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'catalog' | 'settings' | 'notifications' | 'categories' | 'news'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'settings' | 'notifications' | 'categories' | 'news' | 'calendar'>('catalog');
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState<'KA' | 'EN'>('KA');
   const [news, setNews] = useState<any[]>([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [events, setEvents] = useState<any[]>([]);
 
   // Local effect to preview fonts in admin immediately
   useEffect(() => {
@@ -119,7 +121,7 @@ export default function AdminPage() {
       const adminDoc = await getDoc(doc(db, 'admins', u.uid));
       setIsAdmin(adminDoc.exists());
     } catch (e) {
-      console.error('Error checking admin status:', e);
+      console.error('Error checking admin status:', e instanceof Error ? e.message : String(e));
       setIsAdmin(false);
     }
   };
@@ -143,7 +145,7 @@ export default function AdminPage() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (e) {
-      console.error('Login error:', e);
+      console.error('Login error:', e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -191,12 +193,23 @@ export default function AdminPage() {
       handleFirestoreError(err, OperationType.LIST, 'news');
     });
 
+    const unsubscribeEvents = onSnapshot(doc(db, 'settings', 'events'), (snap) => {
+      if (snap.exists() && snap.data().list) {
+        setEvents(snap.data().list);
+      }
+      setLoading(false);
+    }, (err) => {
+      setLoading(false);
+      handleFirestoreError(err, OperationType.GET, 'settings/events');
+    });
+
     return () => {
       unsubscribeCatalog();
       unsubscribeSettings();
       unsubscribeNotifs();
       unsubscribeCategories();
       unsubscribeNews();
+      unsubscribeEvents();
     };
   }, [isAdmin]);
 
@@ -252,10 +265,10 @@ export default function AdminPage() {
             resolve(compressedBase64);
           }
         };
-        img.onerror = reject;
+        img.onerror = () => reject(new Error('Image failed to load'));
         img.src = event.target?.result as string;
       };
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error('File reading failed'));
       reader.readAsDataURL(file);
     });
   };
@@ -265,11 +278,11 @@ export default function AdminPage() {
       // Allow up to 2MB for fonts
       if (file.size > 2 * 1024 * 1024) {
         alert('Font file is too large (max 2MB)');
-        return reject('Large file');
+        return reject(new Error('Large file'));
       }
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error('Font reading failed'));
       reader.readAsDataURL(file);
     });
   };
@@ -322,7 +335,7 @@ export default function AdminPage() {
       await deleteDoc(doc(db, 'catalog', id));
       setConfirmDeleteId(null);
     } catch (err: any) {
-      console.error('Delete error catalog:', err);
+      console.error('Delete error catalog:', err instanceof Error ? err.message : String(err));
       handleFirestoreError(err, OperationType.DELETE, `catalog/${id}`);
     }
   };
@@ -365,7 +378,7 @@ export default function AdminPage() {
       if (editingId === id) setEditingId(null);
       setConfirmDeleteId(null);
     } catch (err: any) {
-      console.error('Detailed firestore delete error:', err);
+      console.error('Detailed firestore delete error:', err instanceof Error ? err.message : String(err));
       handleFirestoreError(err, OperationType.DELETE, `news/${id}`);
     }
   };
@@ -408,7 +421,7 @@ export default function AdminPage() {
         await handleUpdateCatalogItem(id, { [field]: translated });
       }
     } catch (e) {
-      console.error('Translation failed:', e);
+      console.error('Translation failed:', e instanceof Error ? e.message : String(e));
     } finally {
       setTranslatingId(null);
     }
@@ -473,35 +486,42 @@ export default function AdminPage() {
         <nav className="flex-1 space-y-3">
           <motion.button 
             whileTap={{ scale: 0.98 }}
-            onTap={() => setActiveTab('catalog')}
+            onClick={() => setActiveTab('catalog')}
             className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'catalog' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <ImageIcon size={22} /> კატალოგი
           </motion.button>
           <motion.button 
             whileTap={{ scale: 0.98 }}
-            onTap={() => setActiveTab('notifications')}
+            onClick={() => setActiveTab('notifications')}
             className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'notifications' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Bell size={22} /> შეტყობინებები
           </motion.button>
           <motion.button 
             whileTap={{ scale: 0.98 }}
-            onTap={() => setActiveTab('news')}
+            onClick={() => setActiveTab('news')}
             className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'news' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Bell size={22} /> სიახლეები
           </motion.button>
           <motion.button 
             whileTap={{ scale: 0.98 }}
-            onTap={() => setActiveTab('categories')}
+            onClick={() => setActiveTab('categories')}
             className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'categories' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Plus size={22} /> კატეგორიები
           </motion.button>
           <motion.button 
             whileTap={{ scale: 0.98 }}
-            onTap={() => setActiveTab('settings')}
+            onClick={() => setActiveTab('calendar')}
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'calendar' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <Calendar size={22} /> კალენდარი
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab('settings')}
             className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'settings' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Settings size={22} /> პარამეტრები
@@ -510,7 +530,7 @@ export default function AdminPage() {
 
         <motion.button 
           whileTap={{ scale: 0.98 }}
-          onTap={() => auth.signOut()}
+          onClick={() => auth.signOut()}
           className="flex items-center gap-4 px-5 py-4 text-red-500 hover:bg-red-50 rounded-3xl font-black transition-all mt-auto"
         >
           <LogOut size={22} /> გასვლა
@@ -562,11 +582,19 @@ export default function AdminPage() {
               confirmDeleteId={confirmDeleteId}
               setConfirmDeleteId={setConfirmDeleteId}
               handleAddNotification={async () => {
-                await addDoc(collection(db, 'notifications'), { messageKa: 'სიახლე...', messageEn: 'News...', active: true, createdAt: new Date() });
+                try {
+                  await addDoc(collection(db, 'notifications'), { messageKa: 'სიახლე...', messageEn: 'News...', active: true, createdAt: new Date() });
+                } catch (e) {
+                  handleFirestoreError(e, OperationType.CREATE, 'notifications');
+                }
               }}
               handleDeleteNotification={handleDeleteNotification}
               handleUpdateNotification={async (id, data) => {
-                await updateDoc(doc(db, 'notifications', id), data);
+                try {
+                  await updateDoc(doc(db, 'notifications', id), data);
+                } catch (e) {
+                  handleFirestoreError(e, OperationType.UPDATE, `notifications/${id}`);
+                }
               }}
             />
           )}
@@ -578,11 +606,19 @@ export default function AdminPage() {
               setConfirmDeleteId={setConfirmDeleteId}
               iconMap={iconMap}
               handleAddCategory={async () => {
-                await addDoc(collection(db, 'categories'), { titleKa: 'ახალი კატეგორია', titleEn: 'New Category', icon: 'Globe', order: categories.length });
+                try {
+                  await addDoc(collection(db, 'categories'), { titleKa: 'ახალი კატეგორია', titleEn: 'New Category', icon: 'Globe', order: categories.length });
+                } catch (e) {
+                  handleFirestoreError(e, OperationType.CREATE, 'categories');
+                }
               }}
               handleDeleteCategory={handleDeleteCategory}
               handleUpdateCategory={async (id, data) => {
-                await updateDoc(doc(db, 'categories', id), data);
+                try {
+                  await updateDoc(doc(db, 'categories', id), data);
+                } catch (e) {
+                  handleFirestoreError(e, OperationType.UPDATE, `categories/${id}`);
+                }
               }}
             />
           )}
@@ -595,9 +631,24 @@ export default function AdminPage() {
               handleImageUpload={handleImageUpload}
               handleFontUpload={handleFontUpload}
               handleSaveSettings={async () => {
-                await setDoc(doc(db, 'settings', 'global'), globalSettings);
-                alert('შენახულია!');
+                try {
+                  const savePromise = setDoc(doc(db, 'settings', 'global'), globalSettings);
+                  const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('მონაცემთა ბაზასთან კავშირის დრო ამოიწურა. გთხოვთ შეამოწმოთ ინტერნეტი და ადმინისტრატორის უფლებები.')), 25000)
+                  );
+                  await Promise.race([savePromise, timeoutPromise]);
+                  alert('ცვლილებები წარმატებით შეინახა!');
+                } catch (e: any) {
+                  alert(`შენახვა ვერ მოხერხდა: ${e.message || 'უცნობი შეცდომა'}`);
+                }
               }}
+            />
+          )}
+
+          {activeTab === 'calendar' && (
+            <CalendarTab 
+              events={events}
+              setEvents={setEvents}
             />
           )}
         </div>

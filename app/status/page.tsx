@@ -56,7 +56,7 @@ export default function StatusHubPage() {
 
   useEffect(() => {
     // Initial loading delay
-    const minLoadTime = new Promise(resolve => setTimeout(resolve, 800));
+    const minLoadTime = new Promise(resolve => setTimeout(resolve, 200));
     
     if (settingsLoaded) {
       minLoadTime.then(() => {
@@ -128,12 +128,17 @@ export default function StatusHubPage() {
       const response = await fetch('/api/power');
       const result = await response.json();
 
-      if (result.error || result.status !== 200) {
-        throw new Error(result.error || 'API returned non-200 status');
-      }
-
-      const data: Outage[] = result.data || [];
-      const potiOutages = data.filter(item => item.scName === 'ფოთი');
+      // Energo-Pro API sometimes returns data wrapped in { data: [...] } or just [...]
+      const rawData = Array.isArray(result) ? result : (result.data || []);
+      
+      const data: Outage[] = rawData;
+      
+      // More robust filtering: search for "ფოთი" in scName or disconnectionArea
+      const potiOutages = data.filter(item => 
+        (item.scName && item.scName.includes('ფოთი')) || 
+        (item.disconnectionArea && item.disconnectionArea.includes('ფოთი'))
+      );
+      
       const uniqueOutagesMap = new Map<number, Outage>();
       potiOutages.forEach(item => uniqueOutagesMap.set(item.taskId, item));
       const uniqueOutages = Array.from(uniqueOutagesMap.values());
@@ -143,7 +148,7 @@ export default function StatusHubPage() {
       setLastChecked(new Date());
       setRetryCount(0);
     } catch (err: any) {
-      console.error('Fetch error:', err);
+      console.error('Fetch error:', err instanceof Error ? err.message : String(err));
       if (!isRetry && retryCount === 0) {
         setRetryCount(1);
         setError(lang === 'ka' ? '⚠️ API მიუწვდომელია — ცდა 5 წუთში' : '⚠️ API unavailable — retry in 5 min');
@@ -238,7 +243,7 @@ export default function StatusHubPage() {
                       <motion.button
                         key={service.id}
                         whileTap={{ scale: 0.98 }}
-                        onTap={() => setActiveService(service.id)}
+                        onClick={() => setActiveService(service.id)}
                         className={`flex items-center justify-between p-4 rounded-2xl transition-all font-black text-sm uppercase tracking-tight group ${activeService === service.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-100 dark:shadow-none' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                       >
                         <div className="flex items-center gap-3">
@@ -325,14 +330,21 @@ export default function StatusHubPage() {
 }
 
 function PowerSection({ outages, loading, lang, lastChecked }: { outages: Outage[], loading: boolean, lang: 'ka' | 'en', lastChecked: Date | null }) {
-  const nowInGeorgia = new Date(new Date().getTime() + (4 * 60 * 60 * 1000));
+  // Use a more robust date handling that doesn't depend on manual offsets
+  const georgiaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Tbilisi" });
+  const nowInGeorgia = new Date(georgiaTime);
+  
   const todayStr = nowInGeorgia.toISOString().split('T')[0];
   
   const tomorrowDate = new Date(nowInGeorgia);
   tomorrowDate.setDate(tomorrowDate.getDate() + 1);
   const tomorrowStr = tomorrowDate.toISOString().split('T')[0];
 
-  const getDayKey = (dateStr: string) => dateStr.split(' ')[0];
+  const getDayKey = (dateStr: string) => {
+    if (!dateStr) return '';
+    // Handle formats like "2024-05-15 10:00:00" or ISO
+    return dateStr.split(' ')[0] || dateStr.split('T')[0];
+  };
   
   const todayOutages = outages.filter(o => getDayKey(o.disconnectionDate) === todayStr);
   const tomorrowOutages = outages.filter(o => getDayKey(o.disconnectionDate) === tomorrowStr);

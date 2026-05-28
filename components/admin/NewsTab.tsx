@@ -118,8 +118,12 @@ export const NewsTab = ({
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const base64 = await handleImageUpload(file);
-                              handleUpdateNews(item.id, { imageUrl: base64 });
+                              try {
+                                const base64 = await handleImageUpload(file);
+                                handleUpdateNews(item.id, { imageUrl: base64 });
+                              } catch (err) {
+                                console.error("News image upload failed:", err instanceof Error ? err.message : String(err));
+                              }
                             }
                           }}
                         />

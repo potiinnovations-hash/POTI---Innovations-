@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Moon, Sun, Languages, Menu, X, LogOut, Bell, Settings } from 'lucide-react';
+import { Moon, Sun, Languages, Menu, X, LogOut, Bell, Settings, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { auth, db, handleFirestoreError, OperationType } from '@/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -53,23 +53,16 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-blue-100 dark:border-slate-800">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-1">
-          {logoUrl ? (
-            <div className="relative h-9 md:h-11 w-20 md:w-28">
-              <Image 
-                src={logoUrl} 
-                alt="Logo" 
-                fill 
-                className="object-contain object-left" 
-                referrerPolicy="no-referrer"
-              />
-            </div>
-          ) : settings ? (
-            <span className="text-2xl font-black text-blue-900 dark:text-blue-100 tracking-tighter">
-              POTI<span className="text-blue-500">.GE</span>
-            </span>
-          ) : (
-            <div className="h-8 w-24 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />
-          )}
+          <div className="relative h-9 md:h-11 w-24 md:w-32">
+            <Image 
+              src="/logo.png" 
+              alt="Logo" 
+              fill 
+              className="object-contain object-left" 
+              referrerPolicy="no-referrer"
+              priority
+            />
+          </div>
         </Link>
 
         {/* Desktop Nav */}
@@ -77,6 +70,14 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
           <WeatherWidget lang={lang} />
           
           <div className="flex items-center gap-2">
+            <Link 
+              href="/cal"
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
+              title={lang === 'ka' ? 'კალენდარი' : 'Calendar'}
+            >
+              <Calendar size={20} className="text-slate-600 dark:text-slate-400 group-hover:text-blue-500" />
+            </Link>
+
             <Link 
               href="/status"
               className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
@@ -162,6 +163,16 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
 
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link 
+                  href="/cal"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
+                >
+                  <Calendar size={18} className="text-blue-500" /> {lang === 'ka' ? 'კალენდარი' : 'Calendar'}
+                </Link>
+              </motion.div>
+
+              <motion.div whileTap={{ scale: 0.98 }}>
+                <Link 
                   href="/status"
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
@@ -185,7 +196,7 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
 
               <motion.button 
                 whileTap={{ scale: 0.98 }}
-                onTap={() => { setLang(lang === 'ka' ? 'en' : 'ka'); setIsMenuOpen(false); }}
+                onClick={() => { setLang(lang === 'ka' ? 'en' : 'ka'); setIsMenuOpen(false); }}
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
               >
                 <div className="flex items-center gap-3"><Languages size={18} /> {lang === 'ka' ? 'ენა' : 'Language'}</div>
@@ -194,7 +205,7 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
               
               <motion.button 
                 whileTap={{ scale: 0.98 }}
-                onTap={() => { setTheme(theme === 'light' ? 'dark' : 'light'); setIsMenuOpen(false); }}
+                onClick={() => { setTheme(theme === 'light' ? 'dark' : 'light'); setIsMenuOpen(false); }}
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
               >
                 <div className="flex items-center gap-3">{theme === 'light' ? <Moon size={18} /> : <Sun size={18} />} {lang === 'ka' ? 'თემა' : 'Theme'}</div>

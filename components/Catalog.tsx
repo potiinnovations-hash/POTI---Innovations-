@@ -137,7 +137,7 @@ export const Catalog = ({ items, lang, itemsPerRow = 4, settings = {} }: Catalog
             transition={{ delay: index * 0.05 }}
             whileHover={{ y: -5, scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            onTap={() => handleItemClick(item)}
+            onClick={() => handleItemClick(item)}
             className="group relative cursor-pointer"
           >
             <div className="relative aspect-[4/5] rounded-[2.2rem] overflow-hidden bg-white dark:bg-slate-900 border-2 border-white dark:border-slate-800 shadow-xl transition-all duration-500 overflow-hidden">

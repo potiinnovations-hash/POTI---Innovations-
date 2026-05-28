@@ -65,7 +65,7 @@ export default function Home() {
 
   useEffect(() => {
     // Initial loading delay to ensure smooth transition
-    const minLoadTime = new Promise(resolve => setTimeout(resolve, 800));
+    const minLoadTime = new Promise(resolve => setTimeout(resolve, 200));
     
     // When settings load, we still wait for fonts to potentially initialize
     if (settingsLoaded) {
@@ -282,7 +282,7 @@ export default function Home() {
                 >
                   <motion.button 
                     whileTap={{ scale: 0.95 }}
-                    onTap={() => setSelectedCategoryId(null)}
+                    onClick={() => setSelectedCategoryId(null)}
                     className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${!selectedCategoryId ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
                   >
                     <Globe size={18} />
@@ -292,7 +292,7 @@ export default function Home() {
                     <motion.button 
                       key={cat.id}
                       whileTap={{ scale: 0.95 }}
-                      onTap={() => setSelectedCategoryId(cat.id)}
+                      onClick={() => setSelectedCategoryId(cat.id)}
                       className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${selectedCategoryId === cat.id ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
                     >
                       {iconMap[cat.icon] ? React.createElement(iconMap[cat.icon], { size: 18 }) : <Globe size={18} />}

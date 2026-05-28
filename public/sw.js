@@ -2,7 +2,8 @@ const CACHE_NAME = 'poti-v2';
 const ASSETS = [
   '/',
   '/manifest.json',
-  '/globals.css'
+  '/globals.css',
+  '/fav.png'
 ];
 
 self.addEventListener('install', (event) => {
