@@ -3,8 +3,8 @@
   "/api/power/route": "app/api/power/route.js",
   "/admin/page": "app/admin/page.js",
   "/item/[id]/page": "app/item/[id]/page.js",
+  "/cal/page": "app/cal/page.js",
   "/news/page": "app/news/page.js",
   "/page": "app/page.js",
-  "/cal/page": "app/cal/page.js",
   "/status/page": "app/status/page.js"
 }
