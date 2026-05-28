@@ -14,8 +14,10 @@ DirectoryIndex server.js
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteRule ^server.js$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^(.*)$ server.js/$1 [QSA,L]
+
+  # Route _next/static to .next/static on disk so Apache serves static resources directly
+  RewriteRule ^_next/static/(.*)$ .next/static/$1 [L]
+
+  # Prevent unauthorized public web access to log and config files
+  RewriteRule ^(passenger_debug\.log|\.cpanel\.yml|\.gitignore)$ - [F,L]
 </IfModule>

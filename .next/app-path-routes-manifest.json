@@ -2,8 +2,8 @@
   "/_not-found/page": "/_not-found",
   "/api/power/route": "/api/power",
   "/admin/page": "/admin",
-  "/item/[id]/page": "/item/[id]",
   "/cal/page": "/cal",
+  "/item/[id]/page": "/item/[id]",
   "/news/page": "/news",
   "/page": "/",
   "/status/page": "/status"
