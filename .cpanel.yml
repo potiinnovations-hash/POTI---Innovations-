@@ -3,5 +3,5 @@ deployment:
   tasks:
     # IMPORTANT: Replace `/home/username/public_html` with the absolute path
     # to your target deployment directory on cPanel (e.g., your public_html or Node.js app folder)
-    - export DEPLOYPATH=/home/username/public_html
+    - export DEPLOYPATH=/home/poti/public_html
     - /bin/rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.next' ./ $DEPLOYPATH
