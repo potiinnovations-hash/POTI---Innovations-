@@ -188,7 +188,7 @@ function NewsContent() {
                       )}
                       {item.relatedItemId && (
                         <Link 
-                          href={`/item/${item.relatedItemId}`}
+                          href={`/item?id=${item.relatedItemId}`}
                           className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-blue-600 hover:text-white transition-all"
                         >
                           <ArrowRight size={20} />

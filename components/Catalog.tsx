@@ -60,7 +60,7 @@ export const Catalog = ({ items, lang, itemsPerRow = 4, settings = {} }: Catalog
     if (item.redirectDirectly) {
       window.open(item.targetUrl, '_blank');
     } else {
-      router.push(`/item/${item.id}`);
+      router.push(`/item?id=${item.id}`);
     }
   };
 

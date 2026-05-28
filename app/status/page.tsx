@@ -125,7 +125,28 @@ export default function StatusHubPage() {
     if (activeService !== 'power') return;
     setLoading(true);
     try {
-      const response = await fetch('/api/power');
+      let response;
+      try {
+        // Fetch via allorigins CORS proxy to make it a 100% static client-side operation
+        response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://my.energo-pro.ge/owback/alerts')}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
+        if (!response.ok) {
+          throw new Error('AllOrigins proxy returned error');
+        }
+      } catch (proxyErr) {
+        console.warn('Proxy failed, trying direct Energo-Pro fetch:', proxyErr);
+        // Fallback to direct client call in case the public CORS proxy is unreachable
+        response = await fetch('https://my.energo-pro.ge/owback/alerts', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
+      }
       const result = await response.json();
 
       // Energo-Pro API sometimes returns data wrapped in { data: [...] } or just [...]

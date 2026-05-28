@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { doc, getDoc, onSnapshot, collection, query, where, orderBy } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
 import { Header } from '@/components/Header';
 import { LighthouseBackground } from '@/components/LighthouseBackground';
 import LoadingScreen from '@/components/LoadingScreen';
 import { motion, AnimatePresence } from 'motion/react';
+import { useSearchParams } from 'next/navigation';
 import { 
   Phone, 
   MapPin, 
@@ -47,8 +48,9 @@ const iconMap: Record<string, any> = {
   Navigation
 };
 
-export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+function ItemDetailContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id') || '';
   const [lang, setLang] = useState<'ka' | 'en'>('ka');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [item, setItem] = useState<CatalogItem | null>(null);
@@ -439,5 +441,13 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         </motion.main>
       )}
     </AnimatePresence>
+  );
+}
+
+export default function ItemDetailPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <ItemDetailContent />
+    </Suspense>
   );
 }

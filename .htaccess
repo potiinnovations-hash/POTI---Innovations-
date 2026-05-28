@@ -1,23 +1,12 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# cPanel Phusion Passenger Configuration for Next.js
+# cPanel Static HTML Hosting configuration
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PassengerEnabled on
-PassengerAppEnv production
-PassengerAppRoot /home/poti/public_html
-PassengerBaseURI /
-PassengerAppType node
-PassengerStartupFile server.js
-
-# Ensure Apache serves via our Next.js custom server
-DirectoryIndex server.js
+DirectoryIndex index.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Route _next/static to .next/static on disk so Apache serves static resources directly
-  RewriteRule ^_next/static/(.*)$ .next/static/$1 [L]
-
-  # Prevent unauthorized public web access to log and config files
-  RewriteRule ^(passenger_debug\.log|\.cpanel\.yml|\.gitignore)$ - [F,L]
+  # Protect files from unauthorized public web access
+  RewriteRule ^(\.cpanel\.yml|\.gitignore)$ - [F,L]
 </IfModule>
