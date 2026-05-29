@@ -101,6 +101,22 @@
         "relatedItemId": { "type": "string" },
         "createdAt": { "type": "string" }
       }
+    },
+    "outages": {
+      "title": "Municipal Service Outage",
+      "description": "Planned or unplanned municipal service outage (power, water, gas, roads)",
+      "type": "object",
+      "properties": {
+        "service": { "type": "string", "enum": ["power", "water", "gas", "roads"] },
+        "disconnectionAreaKa": { "type": "string" },
+        "disconnectionAreaEn": { "type": "string" },
+        "reasonKa": { "type": "string" },
+        "reasonEn": { "type": "string" },
+        "disconnectionDate": { "type": "string" },
+        "reconnectionDate": { "type": "string" },
+        "affectedSubscribers": { "type": "string" },
+        "createdAt": { "type": "string" }
+      }
     }
   },
   "firestore": {
@@ -108,6 +124,7 @@
     "categories": { "schema": "category", "description": "Catalog categories" },
     "settings": { "schema": "settings", "description": "App settings" },
     "notifications": { "schema": "notifications", "description": "Notifications" },
-    "news": { "schema": "news", "description": "News items" }
+    "news": { "schema": "news", "description": "News items" },
+    "outages": { "schema": "outages", "description": "Municipal service outages" }
   }
 }

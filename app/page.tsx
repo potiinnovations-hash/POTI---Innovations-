@@ -13,8 +13,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Plus, Trash2, Save, LogOut, ArrowLeft, Image as ImageIcon, Bell, Settings, 
   Sparkles, Calendar, UserPlus, MapPin, Phone, Globe, ExternalLink, Mail, Facebook, MessageSquare, Info, ArrowRight,
-  Dumbbell, Trophy, Bus, Car, Plane, Ship, GraduationCap, Book, Waves, Anchor, Fish, Building2, Landmark, Utensils, HeartPulse, Stethoscope, Ticket, Music
+  Dumbbell, Trophy, Bus, Car, Plane, Ship, GraduationCap, Book, Waves, Anchor, Fish, Building2, Landmark, Utensils, HeartPulse, Stethoscope, Ticket, Music,
+  Search
 } from 'lucide-react';
+import SEOManager from '@/components/SEOManager';
 
 const iconMap: Record<string, any> = {
   Calendar,
@@ -52,6 +54,7 @@ const iconMap: Record<string, any> = {
 export default function Home() {
   const [lang, setLang] = useState<'ka' | 'en'>('ka');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [isInitialized, setIsInitialized] = useState(false);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>({});
@@ -99,10 +102,23 @@ export default function Home() {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    if (savedTheme) setTheme(savedTheme);
+    if (savedTheme) {
+      setTheme(savedTheme);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    const savedLang = localStorage.getItem('lang') as 'ka' | 'en';
+    if (savedLang) {
+      setLang(savedLang);
+    }
+    setIsInitialized(true);
   }, []);
 
   useEffect(() => {
+    if (!isInitialized) return;
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -110,7 +126,39 @@ export default function Home() {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
-  }, [theme]);
+  }, [theme, isInitialized]);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    localStorage.setItem('lang', lang);
+  }, [lang, isInitialized]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSearch = urlParams.get('search');
+      let initialSearch = '';
+      if (urlSearch) {
+        initialSearch = urlSearch;
+        localStorage.setItem('portal_search', urlSearch);
+        // Clean URL parameter in a non-disruptive way
+        const newUrl = window.location.pathname;
+        window.history.replaceState({ path: newUrl }, '', newUrl);
+      } else {
+        initialSearch = localStorage.getItem('portal_search') || '';
+      }
+      setSearchTerm(initialSearch);
+
+      const handleSearchChange = (e: any) => {
+        setSearchTerm(e.detail || '');
+      };
+
+      window.addEventListener('portal_search_changed' as any, handleSearchChange);
+      return () => {
+        window.removeEventListener('portal_search_changed' as any, handleSearchChange);
+      };
+    }
+  }, [isInitialized]);
 
   useEffect(() => {
     const qCatalog = query(collection(db, 'catalog'), orderBy('order', 'asc'));
@@ -191,6 +239,20 @@ export default function Home() {
     return () => scrollEl.removeEventListener('scroll', handleScroll);
   }, [categories, loading]);
 
+  const handleCategoryClick = (catId: string | null, index: number) => {
+    setSelectedCategoryId(catId);
+    const scrollEl = document.getElementById('category-scroll');
+    if (scrollEl) {
+      const buttonEl = scrollEl.children[index] as HTMLElement;
+      if (buttonEl) {
+        const scrollHalfWidth = scrollEl.clientWidth / 2;
+        const buttonHalfWidth = buttonEl.clientWidth / 2;
+        const targetScrollLeft = buttonEl.offsetLeft - scrollHalfWidth + buttonHalfWidth;
+        scrollEl.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+      }
+    }
+  };
+
   const filteredItems = catalogItems.filter(item => {
     const title = lang === 'ka' ? item.titleKa : item.titleEn;
     const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -210,6 +272,7 @@ export default function Home() {
           transition={{ duration: 0.5 }}
           className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-500"
         >
+          <SEOManager settings={settings} lang={lang} />
           <LighthouseBackground />
           
           <Header 
@@ -225,7 +288,7 @@ export default function Home() {
           {/* Hero Section */}
           <section className="relative pt-12 pb-20 px-4 overflow-hidden">
             <div className="container mx-auto text-center relative z-10">
-              <div className="max-w-4xl mx-auto h-[180px]">
+              <div className="max-w-4xl mx-auto min-h-[180px]">
                 {!settingsLoaded ? (
                   <div className="flex flex-col items-center gap-4 animate-pulse">
                     <div className="h-16 w-3/4 bg-slate-100 dark:bg-slate-800 rounded-2xl" />
@@ -267,32 +330,34 @@ export default function Home() {
                         settings?.headerDescEn || 'Everything you need in one simplified space'
                       )}
                     </motion.p>
+
+
                   </>
                 )}
               </div>
 
               {/* Categories Row */}
-              <div className="relative group max-w-5xl mx-auto mt-2 px-4 md:px-12">
+              <div className="relative group max-w-5xl mx-auto mt-2">
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar touch-pan-x"
+                  className="flex items-center gap-3 overflow-x-auto pb-4 px-4 md:px-12 no-scrollbar touch-pan-x relative"
                   id="category-scroll"
                 >
                   <motion.button 
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedCategoryId(null)}
+                    onClick={() => handleCategoryClick(null, 0)}
                     className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${!selectedCategoryId ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
                   >
                     <Globe size={18} />
                     {lang === 'ka' ? 'ყველა' : 'All'}
                   </motion.button>
-                  {categories.map(cat => (
+                  {categories.map((cat, idx) => (
                     <motion.button 
                       key={cat.id}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedCategoryId(cat.id)}
+                      onClick={() => handleCategoryClick(cat.id, idx + 1)}
                       className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${selectedCategoryId === cat.id ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
                     >
                       {iconMap[cat.icon] ? React.createElement(iconMap[cat.icon], { size: 18 }) : <Globe size={18} />}
@@ -302,23 +367,15 @@ export default function Home() {
                 </motion.div>
 
                 {/* Pagination Pins */}
-                <div className="flex justify-center gap-1.5 mt-6">
-                  {[...Array(5)].map((_, i) => {
-                    const step = 1 / 4;
-                    const progressTarget = i * step;
-                    const active = Math.abs(scrollProgress - progressTarget) < step / 2;
+                <div className="flex justify-center flex-wrap gap-1.5 mt-6 px-4">
+                  {[{ id: null, titleKa: 'ყველა', titleEn: 'All' }, ...categories].map((cat, i) => {
+                    const active = cat.id === selectedCategoryId;
                     return (
                       <button 
-                        key={i}
-                        onClick={() => {
-                          const scrollEl = document.getElementById('category-scroll');
-                          if (scrollEl) {
-                            const { scrollWidth, clientWidth } = scrollEl;
-                            const total = scrollWidth - clientWidth;
-                            scrollEl.scrollTo({ left: progressTarget * total, behavior: 'smooth' });
-                          }
-                        }}
+                        key={cat.id || 'all'}
+                        onClick={() => handleCategoryClick(cat.id, i)}
                         className={`h-1.5 rounded-full transition-all duration-300 ${active ? 'w-6 bg-primary' : 'w-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
+                        title={lang === 'ka' ? cat.titleKa : cat.titleEn}
                       />
                     );
                   })}

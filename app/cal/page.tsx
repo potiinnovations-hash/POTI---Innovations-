@@ -15,6 +15,7 @@ import {
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, RefreshCw, 
   CheckCircle, AlertCircle, Info, MapPin, Clock, AlignLeft, LogIn, ExternalLink, Settings
 } from 'lucide-react';
+import SEOManager from '@/components/SEOManager';
 
 interface CalendarEvent {
   id: string;
@@ -30,6 +31,7 @@ interface CalendarEvent {
 export default function CalendarPage() {
   const [lang, setLang] = useState<'ka' | 'en'>('ka');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [isInitialized, setIsInitialized] = useState(false);
   const [settings, setSettings] = useState<any>({});
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,11 +47,24 @@ export default function CalendarPage() {
   // Load theme preference
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    if (savedTheme) setTheme(savedTheme);
+    if (savedTheme) {
+      setTheme(savedTheme);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    const savedLang = localStorage.getItem('lang') as 'ka' | 'en';
+    if (savedLang) {
+      setLang(savedLang);
+    }
+    setIsInitialized(true);
   }, []);
 
   // Sync Tailwind dark class
   useEffect(() => {
+    if (!isInitialized) return;
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -57,7 +72,13 @@ export default function CalendarPage() {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
-  }, [theme]);
+  }, [theme, isInitialized]);
+
+  // Sync language selection
+  useEffect(() => {
+    if (!isInitialized) return;
+    localStorage.setItem('lang', lang);
+  }, [lang, isInitialized]);
 
   // Read configuration and public events
   useEffect(() => {
@@ -309,6 +330,7 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-500 relative overflow-hidden">
+      <SEOManager settings={settings} lang={lang} pageTitle={lang === 'ka' ? 'კალენდარი' : 'Calendar'} />
       <LighthouseBackground />
       
       <Header 

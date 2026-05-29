@@ -21,6 +21,8 @@ import { NotificationsTab } from '@/components/admin/NotificationsTab';
 import { CategoriesTab } from '@/components/admin/CategoriesTab';
 import { SettingsTab } from '@/components/admin/SettingsTab';
 import { CalendarTab } from '@/components/admin/CalendarTab';
+import { ServicesTab } from '@/components/admin/ServicesTab';
+import { Wrench } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
   Calendar,
@@ -63,13 +65,14 @@ export default function AdminPage() {
   const [globalSettings, setGlobalSettings] = useState<any>({});
   const [notifications, setNotifications] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'catalog' | 'settings' | 'notifications' | 'categories' | 'news' | 'calendar'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'settings' | 'notifications' | 'categories' | 'news' | 'calendar' | 'services'>('catalog');
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState<'KA' | 'EN'>('KA');
   const [news, setNews] = useState<any[]>([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [events, setEvents] = useState<any[]>([]);
+  const [outages, setOutages] = useState<any[]>([]);
 
   // Local effect to preview fonts in admin immediately
   useEffect(() => {
@@ -203,6 +206,14 @@ export default function AdminPage() {
       handleFirestoreError(err, OperationType.GET, 'settings/events');
     });
 
+    const unsubscribeOutages = onSnapshot(query(collection(db, 'outages'), orderBy('createdAt', 'desc')), (snap) => {
+      setOutages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setLoading(false);
+    }, (err) => {
+      setLoading(false);
+      handleFirestoreError(err, OperationType.LIST, 'outages');
+    });
+
     return () => {
       unsubscribeCatalog();
       unsubscribeSettings();
@@ -210,6 +221,7 @@ export default function AdminPage() {
       unsubscribeCategories();
       unsubscribeNews();
       unsubscribeEvents();
+      unsubscribeOutages();
     };
   }, [isAdmin]);
 
@@ -405,7 +417,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleTranslate = async (id: string, textKa: string, field: 'descriptionEn' | 'titleEn' | 'priceEn' | 'addressEn' | 'contentEn', collectionName: 'catalog' | 'news' = 'catalog') => {
+  const handleTranslate = async (id: string, textKa: string, field: string, collectionName: 'catalog' | 'news' | 'outages' = 'catalog') => {
     if (!textKa || !process.env.NEXT_PUBLIC_GEMINI_API_KEY) return;
     setTranslatingId(id);
     try {
@@ -417,6 +429,8 @@ export default function AdminPage() {
       
       if (collectionName === 'news') {
         await handleUpdateNews(id, { [field]: translated });
+      } else if (collectionName === 'outages') {
+        await handleUpdateOutage(id, { [field]: translated });
       } else {
         await handleUpdateCatalogItem(id, { [field]: translated });
       }
@@ -424,6 +438,51 @@ export default function AdminPage() {
       console.error('Translation failed:', e instanceof Error ? e.message : String(e));
     } finally {
       setTranslatingId(null);
+    }
+  };
+
+  const handleAddOutage = async () => {
+    const formatTime = (d: Date) => {
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+    const now = new Date();
+    const reconnect = new Date(now.getTime() + 6 * 60 * 60 * 1000); // 6 hours later
+
+    const newOutage = {
+      service: 'power',
+      disconnectionAreaKa: 'ჭავჭავაძის ქუჩა (მაგალითი)',
+      disconnectionAreaEn: 'Chavchavadze St (Example)',
+      reasonKa: 'ქსელზე დაგეგმილი პროფილაქტიკური სამუშაოები',
+      reasonEn: 'Planned preventive maintenance works on the grid',
+      disconnectionDate: formatTime(now),
+      reconnectionDate: formatTime(reconnect),
+      affectedSubscribers: '~450',
+      createdAt: now.toISOString()
+    };
+    try {
+      await addDoc(collection(db, 'outages'), newOutage);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.CREATE, 'outages');
+    }
+  };
+
+  const handleUpdateOutage = async (id: string, data: any) => {
+    try {
+      await updateDoc(doc(db, 'outages', id), data);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `outages/${id}`);
+    }
+  };
+
+  const handleDeleteOutage = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!id) return;
+    try {
+      await deleteDoc(doc(db, 'outages', id));
+      setConfirmDeleteId(null);
+    } catch (err: any) {
+      handleFirestoreError(err, OperationType.DELETE, `outages/${id}`);
     }
   };
 
@@ -518,6 +577,13 @@ export default function AdminPage() {
             className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'calendar' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Calendar size={22} /> კალენდარი
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab('services')}
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'services' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <Wrench size={22} /> სერვისები
           </motion.button>
           <motion.button 
             whileTap={{ scale: 0.98 }}
@@ -649,6 +715,19 @@ export default function AdminPage() {
             <CalendarTab 
               events={events}
               setEvents={setEvents}
+            />
+          )}
+
+          {activeTab === 'services' && (
+            <ServicesTab 
+              outages={outages}
+              confirmDeleteId={confirmDeleteId}
+              setConfirmDeleteId={setConfirmDeleteId}
+              handleAddOutage={handleAddOutage}
+              handleDeleteOutage={handleDeleteOutage}
+              handleUpdateOutage={handleUpdateOutage}
+              handleTranslate={(id, text, field) => handleTranslate(id, text, field, 'outages')}
+              translatingId={translatingId}
             />
           )}
         </div>

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { 
-  Plus, Trash2, Save, Image as ImageIcon, Sparkles 
+  Plus, Trash2, Save, Image as ImageIcon, Sparkles, Search, Eye, Globe, ShieldCheck
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -285,6 +285,155 @@ export const SettingsTab = ({
               />
             </div>
          </div>
+
+          {/* SEO Optimization Section */}
+          <div className="space-y-8 pt-8 border-t border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                <Search size={22} />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">ძიებისა და SEO ოპტიმიზაცია</h3>
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">მართეთ საიტის ხილვადობა Google-სა და სოციალურ ქსელებში</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100 space-y-8">
+              {/* Brower Tab Titles */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1">
+                    <Globe size={12} /> საიტის სათაური ბრაუზერში (KA)
+                  </label>
+                  <input
+                    className="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-slate-900 shadow-sm focus:outline-none focus:border-blue-500 text-sm"
+                    placeholder="მაგ: Poti.ge - ფოთის ელექტრონული კატალოგი"
+                    value={globalSettings.seoTitleKa || ''}
+                    onChange={(e) => setGlobalSettings({ ...globalSettings, seoTitleKa: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1">
+                    <Globe size={12} /> Browser Tab Title (EN)
+                  </label>
+                  <input
+                    className="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-slate-900 shadow-sm focus:outline-none focus:border-blue-500 text-sm"
+                    placeholder="e.g., Poti.ge - City Directory & Directory of Services"
+                    value={globalSettings.seoTitleEn || ''}
+                    onChange={(e) => setGlobalSettings({ ...globalSettings, seoTitleEn: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Meta Descriptions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">საიტის აღწერა Google-სთვის (KA)</label>
+                  <textarea
+                    className="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-slate-900 shadow-sm focus:outline-none focus:border-blue-500 text-xs h-24 resize-none"
+                    placeholder="მოკლე მეტა აღწერა, რომელიც გამოჩნდება Google-ის ძიების შედეგებში..."
+                    value={globalSettings.seoDescriptionKa || ''}
+                    onChange={(e) => setGlobalSettings({ ...globalSettings, seoDescriptionKa: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Meta Description for Google (EN)</label>
+                  <textarea
+                    className="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-slate-900 shadow-sm focus:outline-none focus:border-blue-500 text-xs h-24 resize-none"
+                    placeholder="Short meta description to display in search engine snippet cards..."
+                    value={globalSettings.seoDescriptionEn || ''}
+                    onChange={(e) => setGlobalSettings({ ...globalSettings, seoDescriptionEn: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Search Keywords */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">მეტა საკვანძო სიტყვები (KA)</label>
+                  <input
+                    className="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-slate-900 shadow-sm focus:outline-none focus:border-blue-500 text-xs"
+                    placeholder="ფოთი, სერვისები, კატალოგი, ტურიზმი (მძიმეებით გამოყოფილი)"
+                    value={globalSettings.seoKeywordsKa || ''}
+                    onChange={(e) => setGlobalSettings({ ...globalSettings, seoKeywordsKa: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Meta Keywords (EN)</label>
+                  <input
+                    className="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-slate-900 shadow-sm focus:outline-none focus:border-blue-500 text-xs"
+                    placeholder="poti, services, catalog, georgia tourism (comma separated)"
+                    value={globalSettings.seoKeywordsEn || ''}
+                    onChange={(e) => setGlobalSettings({ ...globalSettings, seoKeywordsEn: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Social Media Share Image (OG Image) */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-end px-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">საზიარო სურათი სოციალურ ქსელში (Open Graph Image)</label>
+                  <span className="text-[9px] font-medium text-slate-400 italic">ეს სურათი გამოჩნდება ფეისბუქზე ან სხვაგან გაზიარებისას (რეკომენდირებულია: 1200x630px)</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm group">
+                  <div className="relative w-28 h-20 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {globalSettings.seoShareImageUrl ? (
+                      <Image src={globalSettings.seoShareImageUrl} alt="SEO OpenGraph" fill className="object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <ImageIcon className="text-slate-300" size={24} />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          try {
+                            const base64 = await handleImageUpload(file);
+                            setGlobalSettings({ ...globalSettings, seoShareImageUrl: base64 });
+                          } catch (err) {
+                            console.error("SEO Image upload failed", err);
+                          }
+                          e.target.value = '';
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 w-full space-y-2">
+                    <input
+                      className="w-full bg-slate-50 border-none p-3 rounded-lg font-mono text-xs text-slate-600 focus:ring-1 focus:ring-blue-500"
+                      value={globalSettings.seoShareImageUrl || ''}
+                      onChange={(e) => setGlobalSettings({ ...globalSettings, seoShareImageUrl: e.target.value })}
+                      placeholder="ჩასვით საზიარო სურათის ლინკი ან ატვირთეთ..."
+                    />
+                    {globalSettings.seoShareImageUrl && (
+                      <button
+                        onClick={() => setGlobalSettings({ ...globalSettings, seoShareImageUrl: '' })}
+                        className="text-[11px] font-black text-red-500 hover:text-red-600 transition-colors flex items-center gap-1 inline-flex"
+                      >
+                        <Trash2 size={12} /> სურათის წაშლა
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Google Search Console Verification Code */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1">
+                  <ShieldCheck size={14} className="text-emerald-500" /> Google Site Verification Token (გასაღები)
+                </label>
+                <input
+                  className="w-full bg-white border border-slate-200 p-4 rounded-xl font-mono text-xs text-slate-700 shadow-sm focus:outline-none focus:border-blue-500"
+                  placeholder="მაგ: google-site-verification-id-string..."
+                  value={globalSettings.googleSearchVerification || ''}
+                  onChange={(e) => setGlobalSettings({ ...globalSettings, googleSearchVerification: e.target.value })}
+                />
+                <p className="text-[10px] text-slate-400 font-bold ml-1">მიუთითეთ Google Search Console-ის ვერიფიკაციის კოდი საიტის დასადასტურებლად.</p>
+              </div>
+            </div>
+          </div>
 
          <button 
            onClick={handleSaveSettings}

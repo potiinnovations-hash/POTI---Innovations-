@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Moon, Sun, Languages, Menu, X, LogOut, Bell, Settings, Calendar } from 'lucide-react';
+import { Moon, Sun, Languages, Menu, X, LogOut, Bell, Settings, Calendar, Compass } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { auth, db, handleFirestoreError, OperationType } from '@/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -70,6 +70,14 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
           <WeatherWidget lang={lang} />
           
           <div className="flex items-center gap-2">
+            <Link 
+              href="/map"
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
+              title={lang === 'ka' ? 'რუკა' : 'Map'}
+            >
+              <Compass size={20} className="text-slate-600 dark:text-slate-400 group-hover:text-blue-500" />
+            </Link>
+
             <Link 
               href="/cal"
               className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
@@ -160,6 +168,16 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
               <div className="px-1">
                 <WeatherWidget lang={lang} />
               </div>
+
+              <motion.div whileTap={{ scale: 0.98 }}>
+                <Link 
+                  href="/map"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
+                >
+                  <Compass size={18} className="text-blue-500" /> {lang === 'ka' ? 'რუკა' : 'Interactive Map'}
+                </Link>
+              </motion.div>
 
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link 

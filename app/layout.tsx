@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import MenuWidget from "@/components/MenuWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className="antialiased">
         <ThemeProvider>
           {children}
+          <MenuWidget />
         </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{

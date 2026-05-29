@@ -31,6 +31,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { CatalogItem } from '@/components/Catalog';
+import SEOManager from '@/components/SEOManager';
 
 const iconMap: Record<string, any> = {
   Calendar,
@@ -53,6 +54,7 @@ function ItemDetailContent() {
   const id = searchParams.get('id') || '';
   const [lang, setLang] = useState<'ka' | 'en'>('ka');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [isInitialized, setIsInitialized] = useState(false);
   const [item, setItem] = useState<CatalogItem | null>(null);
   const [settings, setSettings] = useState<any>({});
   const [loading, setLoading] = useState(true);
@@ -75,10 +77,23 @@ function ItemDetailContent() {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    if (savedTheme) setTheme(savedTheme);
+    if (savedTheme) {
+      setTheme(savedTheme);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    const savedLang = localStorage.getItem('lang') as 'ka' | 'en';
+    if (savedLang) {
+      setLang(savedLang);
+    }
+    setIsInitialized(true);
   }, []);
 
   useEffect(() => {
+    if (!isInitialized) return;
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -86,7 +101,12 @@ function ItemDetailContent() {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
-  }, [theme]);
+  }, [theme, isInitialized]);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    localStorage.setItem('lang', lang);
+  }, [lang, isInitialized]);
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -158,6 +178,13 @@ function ItemDetailContent() {
           transition={{ duration: 0.5 }}
           className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-500"
         >
+          <SEOManager 
+            settings={settings} 
+            lang={lang} 
+            pageTitle={lang === 'ka' ? item.titleKa : item.titleEn}
+            pageDescription={lang === 'ka' ? item.descriptionKa : item.descriptionEn}
+            pageImage={item.imageUrl}
+          />
           <LighthouseBackground />
           
           <Header
@@ -300,27 +327,23 @@ function ItemDetailContent() {
                     </a>
                   )}
                   {item.location && (
-                    <a 
-                      href={item.location.startsWith('http') ? item.location : undefined}
-                      target={item.location.startsWith('http') ? "_blank" : undefined}
-                      rel={item.location.startsWith('http') ? "noopener noreferrer" : undefined}
-                      className={`flex items-center gap-4 p-4 rounded-2xl bg-blue-50 dark:bg-slate-900/50 ${item.location.startsWith('http') ? 'hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all group' : ''}`}
+                    <Link 
+                      href={`/map?id=${item.id}`}
+                      className="flex items-center gap-4 p-4 rounded-2xl bg-blue-50 dark:bg-slate-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all group"
                     >
-                      <div className={`w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 transition-colors ${item.location.startsWith('http') ? 'group-hover:bg-blue-600 group-hover:text-white' : ''}`}>
+                      <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
                         <MapPin size={20} />
                       </div>
                       <div className="flex-1 overflow-hidden">
                         <div className="text-[10px] font-bold text-slate-400 uppercase">{lang === 'ka' ? 'მდებარეობა' : 'Location'}</div>
                         <div className="font-bold truncate">
-                          {(lang === 'ka' ? item.addressKa : item.addressEn) || (item.location.startsWith('http') ? (lang === 'ka' ? 'მისამართი' : 'Address') : item.location)}
+                          {(lang === 'ka' ? item.addressKa : item.addressEn) || (lang === 'ka' ? 'ნახვა რუკაზე' : 'View on Map')}
                         </div>
                       </div>
-                      {item.location.startsWith('http') && (
-                        <div className="p-2 bg-blue-600 text-white rounded-lg flex-shrink-0">
-                          <Navigation size={16} />
-                        </div>
-                      )}
-                    </a>
+                      <div className="p-2 bg-blue-600 text-white rounded-lg flex-shrink-0">
+                        <Navigation size={16} />
+                      </div>
+                    </Link>
                   )}
                   {item.workHours && (
                     <div className="flex items-center gap-4 p-4 rounded-2xl bg-blue-50 dark:bg-slate-900/50">

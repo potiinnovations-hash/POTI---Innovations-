@@ -7,6 +7,7 @@ import {
   Phone, Facebook, Mail, Globe, Sparkles 
 } from 'lucide-react';
 import Image from 'next/image';
+import InteractiveMap from '@/components/InteractiveMap';
 
 interface CatalogTabProps {
   catalogItems: any[];
@@ -213,16 +214,47 @@ export const CatalogTab = ({
                           </div>
 
                           <div className="space-y-4">
-                            <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-                              <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
-                                <MapPin size={20} />
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">ლოკაცია რუკაზე (კოორდინატები)</label>
+                                <button 
+                                  type="button"
+                                  className="text-[10px] text-blue-600 font-bold hover:underline cursor-pointer" 
+                                  onClick={() => {
+                                    handleUpdateCatalogItem(item.id, { location: '42.1462,41.6720' });
+                                  }}
+                                >
+                                  ფოთის ცენტრი
+                                </button>
                               </div>
-                              <input 
-                                className="flex-1 bg-transparent border-none p-2 font-bold text-slate-700 text-sm"
-                                value={item.location || ''}
-                                onChange={(e) => handleUpdateCatalogItem(item.id, { location: e.target.value })}
-                                placeholder="რუკის ლინკი"
-                              />
+                              <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+                                <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                                  <MapPin size={20} />
+                                </div>
+                                <input 
+                                  className="flex-1 bg-transparent border-none p-2 font-bold text-slate-700 text-sm"
+                                  value={item.location || ''}
+                                  onChange={(e) => handleUpdateCatalogItem(item.id, { location: e.target.value })}
+                                  placeholder="მაგ: 42.1462, 41.6720"
+                                />
+                              </div>
+                              
+                              <div className="mt-2 w-full rounded-[2rem] overflow-hidden border border-slate-150">
+                                <InteractiveMap 
+                                  items={[]}
+                                  lang="ka"
+                                  height="220px"
+                                  adminMode={true}
+                                  initialLat={item.location && item.location.includes(',') ? parseFloat(item.location.split(',')[0]) : 42.1462}
+                                  initialLng={item.location && item.location.includes(',') ? parseFloat(item.location.split(',')[1]) : 41.6720}
+                                  onCoordinatesSelect={(lat, lng) => {
+                                    handleUpdateCatalogItem(item.id, { location: `${lat.toFixed(5)},${lng.toFixed(5)}` });
+                                  }}
+                                />
+                                <p className="text-[10px] text-slate-400 font-bold px-2 py-1 text-center bg-white border-t border-slate-100">
+                                  💡 დააკლიკეთ რუკაზე ზუსტი ადგილმდებარეობის ასარჩევად
+                                </p>
+                              </div>
                             </div>
                             <div className="space-y-2">
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">მისამართი (KA)</label>

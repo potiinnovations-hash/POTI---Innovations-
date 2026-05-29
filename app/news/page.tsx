@@ -11,11 +11,13 @@ import Image from 'next/image';
 import { ExternalLink, Calendar, ArrowRight, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
+import SEOManager from '@/components/SEOManager';
 
 function NewsContent() {
   const [news, setNews] = useState<any[]>([]);
   const [lang, setLang] = useState<'ka' | 'en'>('ka');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [isInitialized, setIsInitialized] = useState(false);
   const [settings, setSettings] = useState<any>({});
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [fullPageLoading, setFullPageLoading] = useState(true);
@@ -57,9 +59,19 @@ function NewsContent() {
 
   useEffect(() => {
     const savedLang = localStorage.getItem('lang') as 'ka' | 'en';
-    if (savedLang) setLang(savedLang);
+    if (savedLang) {
+      setLang(savedLang);
+    }
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    if (savedTheme) setTheme(savedTheme);
+    if (savedTheme) {
+      setTheme(savedTheme);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    setIsInitialized(true);
 
     const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'global'), (d) => {
       if (d.exists()) {
@@ -97,17 +109,19 @@ function NewsContent() {
   }, [relatedId]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem('lang', lang);
-  }, [lang]);
+  }, [lang, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem('theme', theme);
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [theme]);
+  }, [theme, isInitialized]);
 
   return (
     <AnimatePresence mode="wait">
@@ -121,6 +135,7 @@ function NewsContent() {
           transition={{ duration: 0.5 }}
           className={`min-h-screen font-sans ${theme === 'dark' ? 'dark bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}
         >
+          <SEOManager settings={settings} lang={lang} pageTitle={lang === 'ka' ? 'სიახლეები' : 'News'} />
           <Header 
             lang={lang} 
             setLang={setLang} 
