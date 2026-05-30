@@ -68,7 +68,55 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    return () => unsubscribe();
+    const pwaUnsubscribe = onSnapshot(doc(db, 'settings', 'pwa'), (d) => {
+      if (d.exists()) {
+        const data = d.data();
+        try {
+          const myManifest = {
+            name: data.name || "Poti.ge",
+            short_name: data.shortName || "Poti.ge",
+            description: data.description || "City Directory for Poti",
+            start_url: "/",
+            display: "standalone",
+            orientation: "portrait",
+            background_color: data.backgroundColor || "#ffffff",
+            theme_color: data.themeColor || "#1e40af",
+            icons: [
+              {
+                src: data.icon192 || "/fav.png",
+                sizes: "192x192",
+                type: "image/png",
+                purpose: "any"
+              },
+              {
+                src: data.icon512 || "/fav.png",
+                sizes: "512x512",
+                type: "image/png",
+                purpose: "maskable"
+              }
+            ]
+          };
+          const manifestString = JSON.stringify(myManifest);
+          const blob = new Blob([manifestString], { type: 'application/json' });
+          const manifestUrl = URL.createObjectURL(blob);
+          
+          let manifestEl = document.querySelector('link[rel="manifest"]');
+          if (!manifestEl) {
+            manifestEl = document.createElement('link');
+            manifestEl.setAttribute('rel', 'manifest');
+            document.head.appendChild(manifestEl);
+          }
+          manifestEl.setAttribute('href', manifestUrl);
+        } catch (err) {
+          console.error("Failed to construct dynamic PWA manifest:", err);
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      pwaUnsubscribe();
+    };
   }, []);
 
   return <>{children}</>;

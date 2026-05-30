@@ -8,7 +8,8 @@ import {
   Plus, Trash2, Save, LogOut, ArrowLeft, Image as ImageIcon, Bell, Settings, 
   Sparkles, Calendar, UserPlus, MapPin, Phone, Globe, ExternalLink, Mail, Facebook, MessageSquare, Info, ArrowRight,
   Palette,
-  Dumbbell, Trophy, Bus, Car, Plane, Ship, GraduationCap, Book, Waves, Anchor, Fish, Building2, Landmark, Utensils, HeartPulse, Stethoscope, Ticket, Music
+  Dumbbell, Trophy, Bus, Car, Plane, Ship, GraduationCap, Book, Waves, Anchor, Fish, Building2, Landmark, Utensils, HeartPulse, Stethoscope, Ticket, Music,
+  Heart, Coffee, ShoppingBag, Store, Hotel, Home as HomeIcon, Key, Compass, Clapperboard, Camera, Tv, Activity, ShieldCheck, AlertCircle, Tent, Sailboat, Train, Sunset, Trees, Sparkle, Flame, Zap, Briefcase, Laptop, Smartphone, Wrench, Droplet, GlassWater, Wine, Beer, Pizza, ChefHat, Cake, IceCream, Soup, Cookie, Scissors, Bike
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -22,7 +23,7 @@ import { CategoriesTab } from '@/components/admin/CategoriesTab';
 import { SettingsTab } from '@/components/admin/SettingsTab';
 import { CalendarTab } from '@/components/admin/CalendarTab';
 import { ServicesTab } from '@/components/admin/ServicesTab';
-import { Wrench } from 'lucide-react';
+import { PWATab } from '@/components/admin/PWATab';
 
 const iconMap: Record<string, any> = {
   Calendar,
@@ -54,7 +55,45 @@ const iconMap: Record<string, any> = {
   HeartPulse,
   Stethoscope,
   Ticket,
-  Music
+  Music,
+  Heart,
+  Coffee,
+  ShoppingBag,
+  Store,
+  Hotel,
+  Home: HomeIcon,
+  Key,
+  Compass,
+  Clapperboard,
+  Camera,
+  Tv,
+  Activity,
+  ShieldCheck,
+  AlertCircle,
+  Tent,
+  Sailboat,
+  Train,
+  Sunset,
+  Trees,
+  Sparkle,
+  Flame,
+  Zap,
+  Briefcase,
+  Laptop,
+  Smartphone,
+  Wrench,
+  Droplet,
+  GlassWater,
+  Wine,
+  Beer,
+  Pizza,
+  ChefHat,
+  Cake,
+  IceCream,
+  Soup,
+  Cookie,
+  Scissors,
+  Bike
 };
 
 export default function AdminPage() {
@@ -65,7 +104,7 @@ export default function AdminPage() {
   const [globalSettings, setGlobalSettings] = useState<any>({});
   const [notifications, setNotifications] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'catalog' | 'settings' | 'notifications' | 'categories' | 'news' | 'calendar' | 'services'>('catalog');
+  const [activeTab, setActiveTab ] = useState<'catalog' | 'settings' | 'notifications' | 'categories' | 'news' | 'calendar' | 'services' | 'pwa'>('catalog');
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState<'KA' | 'EN'>('KA');
@@ -592,6 +631,13 @@ export default function AdminPage() {
           >
             <Settings size={22} /> პარამეტრები
           </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab('pwa')}
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'pwa' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <Smartphone size={22} /> PWA მენიუ
+          </motion.button>
         </nav>
 
         <motion.button 
@@ -729,6 +775,10 @@ export default function AdminPage() {
               handleTranslate={(id, text, field) => handleTranslate(id, text, field, 'outages')}
               translatingId={translatingId}
             />
+          )}
+
+          {activeTab === 'pwa' && (
+            <PWATab />
           )}
         </div>
       </main>

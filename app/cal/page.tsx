@@ -473,7 +473,11 @@ export default function CalendarPage() {
                   {lang === 'ka' ? 'არჩეული თარიღი' : 'Selected Date'}
                 </span>
                 <span className="font-extrabold text-sm text-slate-700 dark:text-slate-200">
-                  {activeDate.toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', {
+                  {lang === 'ka' ? (() => {
+                    const weekdaysKa = ['კვირა', 'ორშაბათი', 'სამშაბათი', 'ოთხშაბათი', 'ხუთშაბათი', 'პარასკევი', 'შაბათი'];
+                    const monthsKa = ['იანვარი', 'თებერვალი', 'მარტი', 'აპრილი', 'მაისი', 'ივნისი', 'ივლისი', 'აგვისტო', 'სექტემბერი', 'ოქტომბერი', 'ნოემბერი', 'დეკემბერი'];
+                    return `${weekdaysKa[activeDate.getDay()]}, ${activeDate.getDate()} ${monthsKa[activeDate.getMonth()]}, ${activeDate.getFullYear()}`;
+                  })() : activeDate.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',

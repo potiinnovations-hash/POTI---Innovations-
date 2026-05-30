@@ -14,7 +14,8 @@ import {
   Plus, Trash2, Save, LogOut, ArrowLeft, Image as ImageIcon, Bell, Settings, 
   Sparkles, Calendar, UserPlus, MapPin, Phone, Globe, ExternalLink, Mail, Facebook, MessageSquare, Info, ArrowRight,
   Dumbbell, Trophy, Bus, Car, Plane, Ship, GraduationCap, Book, Waves, Anchor, Fish, Building2, Landmark, Utensils, HeartPulse, Stethoscope, Ticket, Music,
-  Search
+  Search,
+  Heart, Coffee, ShoppingBag, Store, Hotel, Home as HomeIcon, Key, Compass, Clapperboard, Camera, Tv, Activity, ShieldCheck, AlertCircle, Tent, Sailboat, Train, Sunset, Trees, Sparkle, Flame, Zap, Briefcase, Laptop, Smartphone, Wrench, Droplet, GlassWater, Wine, Beer, Pizza, ChefHat, Cake, IceCream, Soup, Cookie, Scissors, Bike
 } from 'lucide-react';
 import SEOManager from '@/components/SEOManager';
 
@@ -48,7 +49,45 @@ const iconMap: Record<string, any> = {
   HeartPulse,
   Stethoscope,
   Ticket,
-  Music
+  Music,
+  Heart,
+  Coffee,
+  ShoppingBag,
+  Store,
+  Hotel,
+  Home: HomeIcon,
+  Key,
+  Compass,
+  Clapperboard,
+  Camera,
+  Tv,
+  Activity,
+  ShieldCheck,
+  AlertCircle,
+  Tent,
+  Sailboat,
+  Train,
+  Sunset,
+  Trees,
+  Sparkle,
+  Flame,
+  Zap,
+  Briefcase,
+  Laptop,
+  Smartphone,
+  Wrench,
+  Droplet,
+  GlassWater,
+  Wine,
+  Beer,
+  Pizza,
+  ChefHat,
+  Cake,
+  IceCream,
+  Soup,
+  Cookie,
+  Scissors,
+  Bike
 };
 
 export default function Home() {
@@ -288,7 +327,7 @@ export default function Home() {
           {/* Hero Section */}
           <section className="relative pt-12 pb-20 px-4 overflow-hidden">
             <div className="container mx-auto text-center relative z-10">
-              <div className="max-w-4xl mx-auto min-h-[180px]">
+              <div className="max-w-4xl mx-auto min-h-[90px]">
                 {!settingsLoaded ? (
                   <div className="flex flex-col items-center gap-4 animate-pulse">
                     <div className="h-16 w-3/4 bg-slate-100 dark:bg-slate-800 rounded-2xl" />
@@ -321,7 +360,7 @@ export default function Home() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
-                      className="font-bold text-lg md:text-xl mb-6"
+                      className="font-bold text-lg md:text-xl mb-3"
                       style={{ color: settings?.textColor || '#64748b' }}
                     >
                       {lang === 'ka' ? (

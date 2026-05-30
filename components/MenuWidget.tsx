@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, Compass, Calendar, Settings, Newspaper, Shield, 
   Monitor, Smartphone, Bell, BellOff, X, Languages, Sun, Moon,
-  CheckCircle2, Info, Search
+  CheckCircle2, Info
 } from 'lucide-react';
 
 interface MenuWidgetProps {
@@ -345,42 +345,6 @@ export default function MenuWidget({ initialLang = 'ka' }: MenuWidgetProps) {
               {/* Scrollable Bento Content Grid */}
               <div className="flex-1 overflow-y-auto pr-1 space-y-6 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
                 
-                {/* Search Bar Widget inside floating menu */}
-                <div className="bg-slate-50/50 dark:bg-slate-900/40 p-4 rounded-3xl border border-slate-100 dark:border-slate-850">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      placeholder={lang === 'ka' ? 'მოძებნე ლოკაცია, სერვისი ან სიახლე...' : 'Search location, service, or news...'}
-                      className="w-full px-5 py-3.5 pl-12 pr-24 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm font-bold placeholder-slate-400"
-                    />
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    {searchTerm && (
-                      <button
-                        onClick={() => handleSearchChange('')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black tracking-wider text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 uppercase bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md transition-colors"
-                      >
-                        {lang === 'ka' ? 'გასუფთავება' : 'Clear'}
-                      </button>
-                    )}
-                  </div>
-                  {pathname !== '/' && searchTerm && (
-                    <motion.p 
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      className="text-[10px] text-blue-500 dark:text-blue-400 font-bold mt-2.5 flex items-center gap-1.5 px-1 leading-relaxed"
-                    >
-                      <Info size={12} className="flex-shrink-0" />
-                      <span>
-                        {lang === 'ka' 
-                          ? 'აქტიური ძიება ავტომატურად გადაგიყვანთ მთავარ გვერდზე შედეგების სანახავად' 
-                          : 'Active search will automatically redirect you to the homepage to inspect filtered results'}
-                      </span>
-                    </motion.p>
-                  )}
-                </div>
-
                 {/* 1. Primary Page Navigation */}
                 <div>
                   <h3 className="text-xs font-black uppercase text-slate-400 tracking-widest mb-3">

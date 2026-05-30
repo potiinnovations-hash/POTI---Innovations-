@@ -178,18 +178,6 @@ function InteractiveMapContent() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch flex-1 min-h-[600px]">
           {/* Side panel (33% width on desktop) */}
           <div className="lg:col-span-4 flex flex-col gap-6 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md p-6 md:p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800/50">
-            {/* Search */}
-            <div className="relative">
-              <input 
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={lang === 'ka' ? 'ძიება ...' : 'Search landmarks...'}
-                className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-none rounded-2xl py-4.5 pl-12 pr-4 font-bold text-sm focus:ring-2 focus:ring-blue-500 shadow-xl shadow-slate-200/50 dark:shadow-none placeholder-slate-400"
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            </div>
-
             {/* Category Filter Pills */}
             <div className="space-y-2">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">
