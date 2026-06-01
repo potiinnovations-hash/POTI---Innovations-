@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Moon, Sun, Languages, Menu, X, LogOut, Bell, Settings, Calendar, Compass } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { auth, db, handleFirestoreError, OperationType } from '@/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -19,6 +20,8 @@ interface HeaderProps {
 }
 
 export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps) => {
+  const pathname = usePathname();
+  const isHome = pathname === '/';
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -125,12 +128,14 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
 
           {user ? (
             <div className="flex items-center gap-3">
-              <Link 
-                href="/admin" 
-                className="px-5 py-2 rounded-full bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg"
-              >
-                {lang === 'ka' ? 'პანელი' : 'Panel'}
-              </Link>
+              {!isHome && (
+                <Link 
+                  href="/admin" 
+                  className="px-5 py-2 rounded-full bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg"
+                >
+                  {lang === 'ka' ? 'პანელი' : 'Panel'}
+                </Link>
+              )}
               <button 
                 onClick={() => auth.signOut()}
                 className="p-2 text-slate-400 hover:text-red-500 transition-colors"
@@ -140,12 +145,14 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
               </button>
             </div>
           ) : (
-            <Link 
-              href="/admin" 
-              className="px-5 py-2 rounded-full bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg"
-            >
-              {lang === 'ka' ? 'ავტორიზაცია' : 'Login'}
-            </Link>
+            !isHome ? (
+              <Link 
+                href="/admin" 
+                className="px-5 py-2 rounded-full bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg"
+              >
+                {lang === 'ka' ? 'ავტორიზაცია' : 'Login'}
+              </Link>
+            ) : null
           )}
         </nav>
 
@@ -230,15 +237,17 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
                 <span className="text-blue-600 uppercase">{theme}</span>
               </motion.button>
 
-              <motion.div whileTap={{ scale: 0.98 }}>
-                <Link 
-                  href="/admin" 
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block w-full py-4 rounded-xl bg-blue-600 text-white font-bold text-center shadow-lg"
-                >
-                  {lang === 'ka' ? 'ადმინ პანელი' : 'Admin Panel'}
-                </Link>
-              </motion.div>
+              {!isHome && (
+                <motion.div whileTap={{ scale: 0.98 }}>
+                  <Link 
+                    href="/admin" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full py-4 rounded-xl bg-blue-600 text-white font-bold text-center shadow-lg"
+                  >
+                    {lang === 'ka' ? 'ადმინ პანელი' : 'Admin Panel'}
+                  </Link>
+                </motion.div>
+              )}
             </div>
           </motion.div>
         )}

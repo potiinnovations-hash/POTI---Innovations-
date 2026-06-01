@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Monitor, Smartphone, Bell, BellOff, Info, CheckCircle2 } from 'lucide-react';
-import { collection, query, orderBy, limit, onSnapshot, where, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot, where, Timestamp, doc } from 'firebase/firestore';
 import { db } from '@/firebase';
+import Link from 'next/link';
 
 interface FooterProps {
   lang?: 'ka' | 'en';
@@ -15,10 +16,26 @@ export default function Footer({ lang = 'ka' }: FooterProps) {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [showToast, setShowToast] = useState<{message: string, type: 'success' | 'info'} | null>(null);
+  const [settings, setSettings] = useState<any>(null);
   const [startTime] = useState(() => {
     // Look back 1 hour to find unread news
     return Timestamp.fromMillis(Date.now() - 60 * 60 * 1000);
   });
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, 'settings', 'global'),
+      (snapshot) => {
+        if (snapshot.exists()) {
+          setSettings(snapshot.data());
+        }
+      },
+      (error) => {
+        console.error('Error loading settings in footer:', error);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     // Handle PWA Install Prompt
@@ -158,7 +175,11 @@ export default function Footer({ lang = 'ka' }: FooterProps) {
           {/* Main Footer Text */}
           <div className="max-w-2xl">
             <p className="text-slate-500 dark:text-slate-400 font-bold text-sm leading-relaxed">
-              დამზადებულია ქალაქ ფოთში, მდგრადი განვითარებისა და ინოვაციების სამსახურის ეგიდით.
+              {lang === 'ka' ? (
+                settings?.footerTextKa || 'დამზადებულია ქალაქ ფოთში, მდგრადი განვითარებისა და ინოვაციების სამსახურის ეგიდით.'
+              ) : (
+                settings?.footerTextEn || 'Made in the City of Poti, under the auspices of the Sustainable Development & Innovations Service.'
+              )}
             </p>
           </div>
 
@@ -177,18 +198,17 @@ export default function Footer({ lang = 'ka' }: FooterProps) {
               </span>
             </motion.button>
 
-            {/* App Mode Button */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={installApp}
+            {/* App Mode Button Link */}
+            <Link 
+              href="/app"
               title={lang === 'ka' ? 'აპლიკაციის რეჟიმი' : 'App Mode'}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 transition-all cursor-pointer"
             >
               <Smartphone size={18} />
               <span className="text-xs font-black uppercase tracking-tight">
                 {lang === 'ka' ? 'აპლიკაცია' : 'App'}
               </span>
-            </motion.button>
+            </Link>
 
             {/* Notifications Button */}
             <motion.button

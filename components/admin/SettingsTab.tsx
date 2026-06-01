@@ -73,6 +73,27 @@ export const SettingsTab = ({
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-slate-100 pb-10">
+            <div className="space-y-4">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-2">ფუტერის ტექსტი (KA)</label>
+              <textarea 
+                className="w-full bg-slate-50 border-none p-5 rounded-2xl font-bold text-slate-900 h-24 resize-none"
+                placeholder="მაგ: დამზადებულია ქალაქ ფოთში..."
+                value={globalSettings.footerTextKa || ''}
+                onChange={(e) => setGlobalSettings({ ...globalSettings, footerTextKa: e.target.value })}
+              />
+            </div>
+            <div className="space-y-4">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-2">ფუტერის ტექსტი (EN)</label>
+              <textarea 
+                className="w-full bg-slate-50 border-none p-5 rounded-2xl font-bold text-slate-900 h-24 resize-none"
+                placeholder="e.g., Made in Poti..."
+                value={globalSettings.footerTextEn || ''}
+                onChange={(e) => setGlobalSettings({ ...globalSettings, footerTextEn: e.target.value })}
+              />
+            </div>
+          </div>
+
          <div className="space-y-4">
            <div className="flex justify-between items-end px-2">
              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">საიტის ლოგო</label>

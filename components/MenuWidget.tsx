@@ -309,9 +309,6 @@ export default function MenuWidget({ initialLang = 'ka' }: MenuWidgetProps) {
                   <h2 className="text-xl md:text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
                     {lang === 'ka' ? 'სწრაფი ნავიგაცია' : 'Quick Navigation'}
                   </h2>
-                  <p className="text-slate-400 text-xs mt-0.5">
-                    {lang === 'ka' ? 'მონიშნეთ გვერდი გადასასვლელად' : 'Select a page, mode, or widget to run'}
-                  </p>
                 </div>
 
                 {/* Close Button & Inline Settings */}
@@ -410,9 +407,10 @@ export default function MenuWidget({ initialLang = 'ka' }: MenuWidgetProps) {
                       </p>
                     </div>
 
-                    {/* Install App Button */}
-                    <div 
-                      onClick={installApp}
+                    {/* Install App Link */}
+                    <Link 
+                      href="/app"
+                      onClick={() => setIsOpen(false)}
                       className="cursor-pointer flex flex-col p-4 rounded-2xl bg-slate-50/50 hover:bg-slate-100/80 dark:bg-slate-900/60 dark:hover:bg-slate-800/50 border border-slate-100 dark:border-slate-800 transition-all duration-300"
                     >
                       <div className="flex items-center gap-3 justify-between">
@@ -429,7 +427,7 @@ export default function MenuWidget({ initialLang = 'ka' }: MenuWidgetProps) {
                       <p className="text-slate-400 text-xs mt-0.5">
                         {lang === 'ka' ? 'დაინსტალირეთ სამუშაო მაგიდაზე' : 'Install city dashboard as PWA'}
                       </p>
-                    </div>
+                    </Link>
 
                     {/* Notifications Button */}
                     <div 
@@ -464,14 +462,7 @@ export default function MenuWidget({ initialLang = 'ka' }: MenuWidgetProps) {
               </div>
               
               {/* Informative Footer Badge */}
-              <div className="flex-shrink-0 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center flex flex-col md:flex-row items-center justify-between gap-4">
-                <span className="text-[11px] font-bold text-slate-400 tracking-tight flex items-center gap-1.5 justify-center md:justify-start">
-                  <Info size={14} className="text-slate-500" />
-                  {lang === 'ka' 
-                    ? 'ფოთის მუნიციპალური მდგრადი განვითარებისა და ინოვაციების ციფრული მენიუ' 
-                    : 'Poti Municipal Sustainable Development & Innovation Quick-Launch Menu'}
-                </span>
-                
+              <div className="flex-shrink-0 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center flex items-center justify-end">
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setIsOpen(false)}
