@@ -1,12 +1,14 @@
 1:"$Sreact.fragment"
-2:I[6174,["992","static/chunks/bc9e92e6-88eef887d2aea05f.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","873","static/chunks/873-ee94314b011192ce.js","177","static/chunks/app/layout-af4e059b035edc76.js"],"ThemeProvider"]
+2:I[6174,["992","static/chunks/bc9e92e6-88eef887d2aea05f.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","248","static/chunks/248-2f98ccce98008c79.js","177","static/chunks/app/layout-6f1cd36bc84d70e1.js"],"ThemeProvider"]
 3:I[9766,[],""]
-4:I[8924,[],""]
-5:I[1081,["992","static/chunks/bc9e92e6-88eef887d2aea05f.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","873","static/chunks/873-ee94314b011192ce.js","177","static/chunks/app/layout-af4e059b035edc76.js"],"default"]
-9:I[7150,[],""]
+4:I[3194,["986","static/chunks/986-bc82cbf940c33b06.js","39","static/chunks/app/error-58e934428d8fc891.js"],"default"]
+5:I[8924,[],""]
+6:I[3293,["986","static/chunks/986-bc82cbf940c33b06.js","345","static/chunks/app/not-found-173e5c10577db78c.js"],"default"]
+7:I[1081,["992","static/chunks/bc9e92e6-88eef887d2aea05f.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","248","static/chunks/248-2f98ccce98008c79.js","177","static/chunks/app/layout-6f1cd36bc84d70e1.js"],"default"]
+b:I[7150,[],""]
 :HL["/_next/static/media/e4af272ccee01ff0-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/_next/static/css/b66fb860743a3a7c.css","style"]
-6:Tb1b,
+:HL["/_next/static/css/af67a7ad529a1afb.css","style"]
+8:Tb1b,
               (function() {
                 if (typeof window !== 'undefined' && !window.__JSON_STRINGIFY_PATCHED__) {
                   window.__JSON_STRINGIFY_PATCHED__ = true;
@@ -62,20 +64,20 @@
                   navigator.serviceWorker.register('/sw.js');
                 });
               }
-            0:{"P":null,"b":"v-r0Sud_4uUB0tZ2BKw6j","p":"","c":["",""],"i":false,"f":[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/b66fb860743a3a7c.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"ka","children":["$","body",null,{"className":"antialiased","children":[["$","$L2",null,{"children":[["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}],["$","$L5",null,{}]]}],["$","script",null,{"dangerouslySetInnerHTML":{"__html":"$6"}}]]}]}]]}],{"children":["__PAGE__","$L7",{},null,false]},null,false],"$L8",false]],"m":"$undefined","G":["$9",[]],"s":false,"S":true}
-a:I[1959,[],"ClientPageRoot"]
-b:I[7662,["992","static/chunks/bc9e92e6-88eef887d2aea05f.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","873","static/chunks/873-ee94314b011192ce.js","758","static/chunks/758-284dd99bdef447f1.js","648","static/chunks/648-8853511a025bacbc.js","922","static/chunks/922-e67d8fad3e0154bb.js","974","static/chunks/app/page-84a9da4890419124.js"],"default"]
-e:I[4431,[],"OutletBoundary"]
-10:I[5278,[],"AsyncMetadataOutlet"]
-12:I[4431,[],"ViewportBoundary"]
-14:I[4431,[],"MetadataBoundary"]
-15:"$Sreact.suspense"
-7:["$","$1","c",{"children":[["$","$La",null,{"Component":"$b","searchParams":{},"params":{},"promises":["$@c","$@d"]}],null,["$","$Le",null,{"children":["$Lf",["$","$L10",null,{"promise":"$@11"}]]}]]}]
-8:["$","$1","h",{"children":[null,[["$","$L12",null,{"children":"$L13"}],["$","meta",null,{"name":"next-size-adjust","content":""}]],["$","$L14",null,{"children":["$","div",null,{"hidden":true,"children":["$","$15",null,{"fallback":null,"children":"$L16"}]}]}]]}]
-c:{}
-d:"$7:props:children:0:props:params"
-13:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-f:null
-17:I[622,[],"IconMark"]
-11:{"metadata":[["$","title","0",{"children":"Poti.ge"}],["$","meta","1",{"name":"description","content":"City Directory for Poti"}],["$","link","2",{"rel":"manifest","href":"/manifest.json","crossOrigin":"$undefined"}],["$","meta","3",{"name":"mobile-web-app-capable","content":"yes"}],["$","meta","4",{"name":"apple-mobile-web-app-title","content":"Poti.ge"}],["$","meta","5",{"name":"apple-mobile-web-app-status-bar-style","content":"default"}],["$","link","6",{"rel":"icon","href":"/fav.png"}],["$","link","7",{"rel":"apple-touch-icon","href":"/fav.png"}],["$","$L17","8",{}]],"error":null,"digest":"$undefined"}
-16:"$11:metadata"
+            0:{"P":null,"b":"QhvDGrOapsL2O71ib9E5T","p":"","c":["",""],"i":false,"f":[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/af67a7ad529a1afb.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"ka","children":["$","body",null,{"className":"antialiased","children":[["$","$L2",null,{"children":[["$","$L3",null,{"parallelRouterKey":"children","error":"$4","errorStyles":[],"errorScripts":[],"template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","$L6",null,{}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}],["$","$L7",null,{}]]}],["$","script",null,{"dangerouslySetInnerHTML":{"__html":"$8"}}]]}]}]]}],{"children":["__PAGE__","$L9",{},null,false]},null,false],"$La",false]],"m":"$undefined","G":["$b",[]],"s":false,"S":true}
+c:I[1959,[],"ClientPageRoot"]
+d:I[7662,["992","static/chunks/bc9e92e6-88eef887d2aea05f.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","248","static/chunks/248-2f98ccce98008c79.js","758","static/chunks/758-284dd99bdef447f1.js","648","static/chunks/648-8853511a025bacbc.js","922","static/chunks/922-f2d32504d6f82b44.js","974","static/chunks/app/page-caf82e2488138e8a.js"],"default"]
+10:I[4431,[],"OutletBoundary"]
+12:I[5278,[],"AsyncMetadataOutlet"]
+14:I[4431,[],"ViewportBoundary"]
+16:I[4431,[],"MetadataBoundary"]
+17:"$Sreact.suspense"
+9:["$","$1","c",{"children":[["$","$Lc",null,{"Component":"$d","searchParams":{},"params":{},"promises":["$@e","$@f"]}],null,["$","$L10",null,{"children":["$L11",["$","$L12",null,{"promise":"$@13"}]]}]]}]
+a:["$","$1","h",{"children":[null,[["$","$L14",null,{"children":"$L15"}],["$","meta",null,{"name":"next-size-adjust","content":""}]],["$","$L16",null,{"children":["$","div",null,{"hidden":true,"children":["$","$17",null,{"fallback":null,"children":"$L18"}]}]}]]}]
+e:{}
+f:"$9:props:children:0:props:params"
+15:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+11:null
+19:I[622,[],"IconMark"]
+13:{"metadata":[["$","title","0",{"children":"Poti.ge"}],["$","meta","1",{"name":"description","content":"City Directory for Poti"}],["$","link","2",{"rel":"manifest","href":"/manifest.json","crossOrigin":"$undefined"}],["$","meta","3",{"name":"mobile-web-app-capable","content":"yes"}],["$","meta","4",{"name":"apple-mobile-web-app-title","content":"Poti.ge"}],["$","meta","5",{"name":"apple-mobile-web-app-status-bar-style","content":"default"}],["$","link","6",{"rel":"icon","href":"/fav.png"}],["$","link","7",{"rel":"apple-touch-icon","href":"/fav.png"}],["$","$L19","8",{}]],"error":null,"digest":"$undefined"}
+18:"$13:metadata"
