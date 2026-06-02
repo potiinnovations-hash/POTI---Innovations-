@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Plus, Trash2, Image as ImageIcon, MapPin, Calendar, 
-  Phone, Facebook, Mail, Globe, Sparkles 
+  Phone, Facebook, Mail, Globe, Sparkles, ChevronUp, ChevronDown 
 } from 'lucide-react';
 import Image from 'next/image';
 import InteractiveMap from '@/components/InteractiveMap';
@@ -42,6 +42,31 @@ export const CatalogTab = ({
   handleTranslate,
   handleImageUpload
 }: CatalogTabProps) => {
+
+  const handleMoveCatalogItem = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= catalogItems.length) return;
+
+    const currentItem = catalogItems[index];
+    const targetItem = catalogItems[targetIndex];
+
+    const currentOrder = currentItem.order ?? index;
+    const targetOrder = targetItem.order ?? targetIndex;
+
+    let newCurrentOrder = targetOrder;
+    let newTargetOrder = currentOrder;
+    if (newCurrentOrder === newTargetOrder) {
+      if (direction === 'up') {
+        newCurrentOrder = targetOrder - 1;
+      } else {
+        newCurrentOrder = targetOrder + 1;
+      }
+    }
+
+    handleUpdateCatalogItem(currentItem.id, { order: newCurrentOrder });
+    handleUpdateCatalogItem(targetItem.id, { order: newTargetOrder });
+  };
+
   return (
     <div className="space-y-12">
       <header className="flex justify-between items-end">
@@ -58,7 +83,7 @@ export const CatalogTab = ({
       </header>
 
       <div className="grid gap-6">
-        {catalogItems.map((item) => (
+        {catalogItems.map((item, index) => (
           <motion.div 
             layout
             key={item.id} 
@@ -67,6 +92,34 @@ export const CatalogTab = ({
             {/* Collapsed Header */}
             <div className="p-6 flex items-center justify-between gap-6">
               <div className="flex items-center gap-6 flex-1 min-w-0">
+                {/* Arrow Controls */}
+                <div className="flex flex-col gap-1 flex-shrink-0 bg-slate-50 p-1 rounded-2xl border border-slate-100/80">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMoveCatalogItem(index, 'up');
+                    }}
+                    disabled={index === 0}
+                    className="p-1 rounded-xl hover:bg-slate-205 text-slate-400 hover:text-slate-700 disabled:opacity-20 transition-all cursor-pointer active:scale-90"
+                    title="Move Up"
+                  >
+                    <ChevronUp size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMoveCatalogItem(index, 'down');
+                    }}
+                    disabled={index === catalogItems.length - 1}
+                    className="p-1 rounded-xl hover:bg-slate-205 text-slate-400 hover:text-slate-700 disabled:opacity-20 transition-all cursor-pointer active:scale-90"
+                    title="Move Down"
+                  >
+                    <ChevronDown size={18} />
+                  </button>
+                </div>
+
                 <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 flex-shrink-0 shadow-inner">
                   <Image src={item.imageUrl} alt="" fill className="object-cover" referrerPolicy="no-referrer" />
                 </div>
@@ -189,7 +242,7 @@ export const CatalogTab = ({
                         </div>
 
                         <div className="space-y-8">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-2">
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">კატეგორია</label>
                               <select 
@@ -209,6 +262,15 @@ export const CatalogTab = ({
                                 className="w-full bg-white border-none p-4 rounded-2xl font-bold text-slate-900 shadow-sm"
                                 value={item.price || ''}
                                 onChange={(e) => handleUpdateCatalogItem(item.id, { price: e.target.value })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">სორტირების რიგი</label>
+                              <input 
+                                type="number"
+                                className="w-full bg-white border-none p-4 rounded-2xl font-bold text-slate-900 shadow-sm focus:ring-2 focus:ring-blue-500 transition-all"
+                                value={item.order ?? 0}
+                                onChange={(e) => handleUpdateCatalogItem(item.id, { order: parseInt(e.target.value) || 0 })}
                               />
                             </div>
                           </div>
