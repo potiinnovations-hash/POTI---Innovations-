@@ -290,26 +290,44 @@ export const CatalogTab = ({
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-4 bg-white p-3 rounded-3xl shadow-sm">
-                              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl mb-1 flex items-center justify-center">
-                                <Facebook size={24} />
+                            <div className="flex flex-col gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                              <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                                  <Facebook size={24} />
+                                </div>
+                                <div className="flex-1 grid grid-cols-2 gap-4">
+                                  <div className="space-y-1">
+                                    <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Facebook URL</label>
+                                    <input 
+                                      className="w-full bg-slate-50 border-none px-3 py-2 rounded-xl font-bold text-slate-700 text-xs"
+                                      value={item.facebookUrl || ''}
+                                      onChange={(e) => handleUpdateCatalogItem(item.id, { facebookUrl: e.target.value })}
+                                      placeholder="https://facebook.com/..."
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-[9px] font-black text-slate-400 uppercase ml-1">სახელი</label>
+                                    <input 
+                                      className="w-full bg-slate-50 border-none px-3 py-2 rounded-xl font-bold text-slate-700 text-xs"
+                                      value={item.facebookName || ''}
+                                      onChange={(e) => handleUpdateCatalogItem(item.id, { facebookName: e.target.value })}
+                                      placeholder="Poti Page"
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                              <div className="flex-1 grid grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-50 pt-3">
                                 <div className="space-y-1">
-                                  <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Facebook URL</label>
+                                  <label className="text-[9px] font-black text-slate-400 uppercase ml-1">ინდივიდუალური ჰეშთეგი</label>
                                   <input 
                                     className="w-full bg-slate-50 border-none px-3 py-2 rounded-xl font-bold text-slate-700 text-xs"
-                                    value={item.facebookUrl || ''}
-                                    onChange={(e) => handleUpdateCatalogItem(item.id, { facebookUrl: e.target.value })}
+                                    value={item.facebookPostHashtag || ''}
+                                    onChange={(e) => handleUpdateCatalogItem(item.id, { facebookPostHashtag: e.target.value })}
+                                    placeholder="მაგ: #potige"
                                   />
                                 </div>
-                                <div className="space-y-1">
-                                  <label className="text-[9px] font-black text-slate-400 uppercase ml-1">სახელი</label>
-                                  <input 
-                                    className="w-full bg-slate-50 border-none px-3 py-2 rounded-xl font-bold text-slate-700 text-xs"
-                                    value={item.facebookName || ''}
-                                    onChange={(e) => handleUpdateCatalogItem(item.id, { facebookName: e.target.value })}
-                                  />
+                                <div className="flex items-center text-[10px] text-slate-400 font-bold bg-slate-50/50 px-3 rounded-xl">
+                                  💡 თუ ცარიელია, გამოიყენებს პარამეტრების გლობალურ ჰეშთეგს.
                                 </div>
                               </div>
                             </div>

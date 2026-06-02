@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { 
-  Plus, Trash2, Save, Image as ImageIcon, Sparkles, Search, Eye, Globe, ShieldCheck
+  Plus, Trash2, Save, Image as ImageIcon, Sparkles, Search, Eye, Globe, ShieldCheck, Facebook
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -29,6 +29,23 @@ export const SettingsTab = ({
           <h2 className="text-5xl font-black text-slate-900 tracking-tight mb-2">პარამეტრები</h2>
           <p className="text-slate-500 font-bold text-lg">საიტის გლობალური კონფიგურაცია</p>
        </header>
+
+       {/* Feature Guide Notice */}
+       <div className="bg-blue-50/50 border border-blue-100 rounded-[2rem] p-6 space-y-2">
+         <div className="flex items-center gap-2">
+           <span className="text-[10px] font-black uppercase text-blue-600 bg-blue-100/60 px-3 py-1 rounded-full">ფუნქციების მეგზური / FEATURE GUIDE</span>
+           <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping"></span>
+         </div>
+         <h4 className="text-sm font-black text-slate-900 tracking-tight">📱 Facebook ჰეშთეგების მართვა (Hashtag Management)</h4>
+         <p className="text-xs text-slate-500 font-bold leading-relaxed">
+           Facebook-დან სიახლეების ავტომატური სინქრონიზაციისა და ჰეშთეგების მართვა განთავსებულია:
+         </p>
+         <ul className="list-disc pl-5 text-xs text-slate-500 font-bold space-y-1">
+           <li><strong>პარამეტრების გვერდზე (აქ):</strong> ჩამოისქროლეთ ბოლოში, რათა ჩართოთ გლობალური სინქრონიზაცია და მიუთითოთ გლობალური ჰეშთეგი (მაგ. <code className="font-mono bg-blue-50 text-blue-600 px-1 rounded">#potige</code>).</li>
+           <li><strong>კატალოგის თაბში:</strong> გახსენით კატალოგის ნებისმიერი ლოკაცია, დააჭირეთ რედაქტირებას და მიუთითეთ საჯარო ფეისბუქის URL და ინდივიდუალური ჰეშთეგი შესაბამისი გვერდისთვის.</li>
+           <li><strong>სიახლეების თაბში:</strong> იხილავთ ღილაკს <strong>&quot;Facebook სინქრონიზაცია&quot;</strong> მექანიკური პარსინგის გასაშვებად.</li>
+         </ul>
+       </div>
 
        <div className="bg-white p-12 rounded-[3rem] shadow-sm border border-slate-100 space-y-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-slate-100 pb-10">
@@ -452,6 +469,52 @@ export const SettingsTab = ({
                   onChange={(e) => setGlobalSettings({ ...globalSettings, googleSearchVerification: e.target.value })}
                 />
                 <p className="text-[10px] text-slate-400 font-bold ml-1">მიუთითეთ Google Search Console-ის ვერიფიკაციის კოდი საიტის დასადასტურებლად.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Facebook Auto-Sync Configuration Section */}
+          <div className="space-y-8 pt-8 border-t border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                <Facebook size={22} />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">Facebook-ის პოსტების ავტო-სინქრონიზაცია</h3>
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">ავტომატურად გამოაქვეყნეთ სიახლეები facebook გვერდებიდან შესაბამისი ჰეშთეგით</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100 space-y-6">
+              <div className="flex items-center justify-between bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                  <h4 className="text-sm font-black text-slate-800">ფეისბუქის ავტო-სინქრონიზაციის ჩართვა</h4>
+                  <p className="text-xs text-slate-400 font-bold mt-1">ჩართეთ ან გამორთეთ საიტზე ფეისბუქიდან სიახლეების ავტომატური სინქრონიზაცია</p>
+                </div>
+                <div 
+                  onClick={() => setGlobalSettings({ ...globalSettings, facebookSyncEnabled: !globalSettings.facebookSyncEnabled })}
+                  className={`w-14 h-8 rounded-full p-1 cursor-pointer transition-all ${globalSettings.facebookSyncEnabled ? 'bg-blue-600' : 'bg-slate-200'}`}
+                >
+                  <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all transform ${globalSettings.facebookSyncEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">გლობალური ჰეშთეგი (Global Hashtag)</label>
+                  <input
+                    className="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-slate-900 shadow-sm focus:outline-none focus:border-blue-500 text-sm"
+                    placeholder="მაგ: #potige"
+                    value={globalSettings.facebookSyncHashtag || ''}
+                    onChange={(e) => setGlobalSettings({ ...globalSettings, facebookSyncHashtag: e.target.value })}
+                  />
+                  <p className="text-[10px] text-slate-400 font-bold ml-1">მხოლოდ ამ #ჰეშთეგის მქონე პოსტები გამოქვეყნდება ვებსაიტის სიახლეებში.</p>
+                </div>
+
+                <div className="flex flex-col justify-center bg-blue-50/40 border border-blue-100 p-4 rounded-xl text-xs text-blue-900 leading-relaxed">
+                  <span className="font-extrabold mb-1">💡 როგორ მუშაობს?</span>
+                  როდესაც კატალოგის ელემენტს მითითებული აქვს <strong>Facebook URL</strong>, სისტემა პერიოდულად ამოწმებს გვერდს და ამატებს ახალ პოსტებს სიახლეების განყოფილებაში, რომლებიც შეიცავენ მითითებულ ჰეშთეგს. შეგიძლიათ გამოიყენოთ კატალოგის ინდივიდუალური ჰეშთეგის ოფციებიც.
+                </div>
               </div>
             </div>
           </div>

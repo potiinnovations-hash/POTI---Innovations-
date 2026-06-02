@@ -67,6 +67,19 @@ export default function MenuWidget({ initialLang = 'ka' }: MenuWidgetProps) {
   useEffect(() => {
     syncState();
 
+    // Trigger Facebook background auto-sync check quietly on mount
+    fetch('/api/facebook-sync/check-auto')
+      .then(res => {
+        if (!res.ok) {
+          // Silent fallback for non-OK response statuses
+          return;
+        }
+        res.json().catch(() => ({}));
+      })
+      .catch(() => {
+        // Quietly absorb background fetch connection rejections/offline errors
+      });
+
     // Listen to fullscreen changes to update UI dynamically
     const handleFullscreenChange = () => {
       setIsKiosk(!!document.fullscreenElement);

@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Plus, Trash2, Image as ImageIcon, Sparkles, ExternalLink 
+  Plus, Trash2, Image as ImageIcon, Sparkles, ExternalLink, Facebook, RefreshCw
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -36,19 +36,71 @@ export const NewsTab = ({
   handleTranslate,
   handleImageUpload
 }: NewsTabProps) => {
+  const [isSyncing, setIsSyncing] = React.useState(false);
+  const [syncStatus, setSyncStatus] = React.useState<{ success: boolean; text: string } | null>(null);
+
+  const handleFacebookSync = async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    setSyncStatus(null);
+    try {
+      const response = await fetch('/api/facebook-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ manual: true })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSyncStatus({ 
+          success: true, 
+          text: `წარმატებით დასრულდა! სინქრონიზირდა ${data.syncedCount || 0} ახალი პოსტი.` 
+        });
+      } else {
+        setSyncStatus({ 
+          success: false, 
+          text: `შეცდომა სინქრონიზაციისას: ${data.error || 'უცნობი ხარვეზი'}` 
+        });
+      }
+    } catch (err: any) {
+      setSyncStatus({ 
+        success: false, 
+        text: `ქსელის შეცდომა: ${err.message || 'ვერ მოხერხდა კავშირი'}` 
+      });
+    } finally {
+      setIsSyncing(false);
+      setTimeout(() => setSyncStatus(null), 8000);
+    }
+  };
+
   return (
     <div className="space-y-12">
-      <header className="flex justify-between items-end">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h2 className="text-5xl font-black text-slate-900 tracking-tight mb-2">სიახლეები</h2>
           <p className="text-slate-500 font-bold text-lg">მართეთ ქალაქის სიახლეები და განახლებები</p>
         </div>
-        <button 
-          onClick={handleAddNews}
-          className="flex items-center gap-3 px-8 py-5 bg-blue-600 text-white rounded-[2rem] font-black hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200"
-        >
-          <Plus size={24} /> ახალი სიახლე
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {syncStatus && (
+            <div className={`px-4 py-3 rounded-2xl text-xs font-black shadow-sm ${syncStatus.success ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-red-50 text-red-800 border border-red-100'}`}>
+              {syncStatus.text}
+            </div>
+          )}
+          <button
+            onClick={handleFacebookSync}
+            disabled={isSyncing}
+            className={`flex items-center gap-3 px-6 py-5 rounded-[2rem] font-black transition-all text-sm border shadow-sm ${isSyncing ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed' : 'bg-white text-blue-600 border-blue-100 hover:bg-slate-50'}`}
+          >
+            <Facebook size={18} className={isSyncing ? 'animate-pulse text-slate-400' : 'text-blue-600'} />
+            {isSyncing ? 'სინქრონიზაცია...' : 'Facebook სინქრონიზაცია'}
+            {isSyncing && <RefreshCw size={14} className="animate-spin ml-1" />}
+          </button>
+          <button 
+            onClick={handleAddNews}
+            className="flex items-center gap-3 px-8 py-5 bg-blue-600 text-white rounded-[2rem] font-black hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 text-sm"
+          >
+            <Plus size={20} /> ახალი სიახლე
+          </button>
+        </div>
       </header>
 
       <div className="grid gap-6">

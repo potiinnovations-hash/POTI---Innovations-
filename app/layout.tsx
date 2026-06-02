@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import MenuWidget from "@/components/MenuWidget";
+import PWAPromptWidget from "@/components/PWAPromptWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <MenuWidget />
+          <PWAPromptWidget />
         </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{

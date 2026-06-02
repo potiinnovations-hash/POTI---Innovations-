@@ -23,6 +23,7 @@
         "gallery": { "type": "array", "items": { "type": "string" } },
         "facebookUrl": { "type": "string" },
         "facebookName": { "type": "string" },
+        "facebookPostHashtag": { "type": "string" },
         "email": { "type": "string" },
         "showWebsite": { "type": "boolean" },
         "ctaButton": {
@@ -62,7 +63,10 @@
         "logoUrl": { "type": "string" },
         "titleColor": { "type": "string" },
         "textColor": { "type": "string" },
-        "buttonColor": { "type": "string" }
+        "buttonColor": { "type": "string" },
+        "facebookSyncEnabled": { "type": "boolean" },
+        "facebookSyncHashtag": { "type": "string" },
+        "lastFacebookSyncTimestamp": { "type": "string" }
       }
     },
     "notifications": {
