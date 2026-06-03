@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Moon, Sun, Languages, Menu, X, LogOut, Bell, Settings, Calendar, Compass } from 'lucide-react';
+import { Moon, Sun, Languages, Menu, X, LogOut, Bell, Settings, Calendar, Compass, Sparkles } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { auth, db, handleFirestoreError, OperationType } from '@/firebase';
@@ -110,6 +110,14 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
               )}
             </Link>
 
+            <Link 
+              href="/plans"
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
+              title={lang === 'ka' ? 'ეკოსისტემა' : 'Ecosystem'}
+            >
+              <Sparkles size={20} className="text-slate-600 dark:text-slate-400 group-hover:text-blue-500" />
+            </Link>
+
             <button 
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -210,12 +218,22 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
                 <Link 
                   href="/news"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold mb-1"
                 >
-                  <div className="flex items-center gap-3"><Bell size={18} /> {lang === 'ka' ? 'სიახლეები' : 'News'}</div>
+                  <div className="flex items-center gap-3"><Bell size={18} className="text-blue-500" /> {lang === 'ka' ? 'სიახლეები' : 'News'}</div>
                   {unreadCount > 0 && (
                     <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">{unreadCount}</span>
                   )}
+                </Link>
+              </motion.div>
+
+              <motion.div whileTap={{ scale: 0.98 }}>
+                <Link 
+                  href="/plans"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
+                >
+                  <Sparkles size={18} className="text-blue-500" /> {lang === 'ka' ? 'ციფრული ეკოსისტემა' : 'Digital Ecosystem'}
                 </Link>
               </motion.div>
 

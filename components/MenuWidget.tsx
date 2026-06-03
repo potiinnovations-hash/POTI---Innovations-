@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, Compass, Calendar, Settings, Newspaper, Shield, 
   Monitor, Smartphone, Bell, BellOff, X, Languages, Sun, Moon,
-  CheckCircle2, Info
+  CheckCircle2, Info, Sparkles
 } from 'lucide-react';
 
 interface MenuWidgetProps {
@@ -272,6 +272,15 @@ export default function MenuWidget({ initialLang = 'ka' }: MenuWidgetProps) {
       descKa: 'ქალაქ ფოთის სიახლეების ლენტა',
       descEn: 'Stay updated with local feeds',
       color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+    },
+    {
+      href: '/plans',
+      icon: Sparkles,
+      titleKa: 'ციფრული ეკოსისტემა',
+      titleEn: 'Digital Ecosystem',
+      descKa: 'მომავალი აპლიკაციები და განვითარების გეგმები',
+      descEn: 'Future civic apps & ecosystem roadmap',
+      color: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
     },
     {
       href: '/admin',
