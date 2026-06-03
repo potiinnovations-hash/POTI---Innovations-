@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import admin from 'firebase-admin';
-import { getFirestore } from 'firebase-admin/firestore';
-import firebaseConfig from '../../../../firebase-applet-config.json';
+import { db } from "../../../../firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { runFacebookSync } from "../syncService";
-
-const app = !admin.apps.length
-  ? admin.initializeApp({ projectId: firebaseConfig.projectId })
-  : admin.apps[0]!;
-
-const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
 export async function GET(req: NextRequest) {
   try {
     // 1. Fetch settings
-    const settingsDoc = await db.collection('settings').doc('global').get();
-    if (!settingsDoc.exists) {
+    const settingsDoc = await getDoc(doc(db, 'settings', 'global'));
+    if (!settingsDoc.exists()) {
       return NextResponse.json({ autoTriggered: false, reason: "Settings not found" });
     }
 
