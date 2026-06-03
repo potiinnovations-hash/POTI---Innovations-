@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "../../../../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../../firebase-lite";
+import { doc, getDoc } from "firebase/firestore/lite";
 import { runFacebookSync } from "../syncService";
 
 export async function GET(req: NextRequest) {

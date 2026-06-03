@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
-import { db } from '../../../firebase';
-import { doc, getDoc, collection, getDocs, addDoc, updateDoc, query, where } from 'firebase/firestore';
+import { db } from '../../../firebase-lite';
+import { doc, getDoc, collection, getDocs, addDoc, updateDoc, query, where } from 'firebase/firestore/lite';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
