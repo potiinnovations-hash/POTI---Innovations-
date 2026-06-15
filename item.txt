@@ -1,61 +1,67 @@
 1:"$Sreact.fragment"
-2:I[6174,["992","static/chunks/bc9e92e6-2ef0a3575fa56451.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","673","static/chunks/673-de5e75f798db4c43.js","177","static/chunks/app/layout-b132996f9ade1f93.js"],"ThemeProvider"]
-3:I[9766,[],""]
-4:I[3194,["986","static/chunks/986-bc82cbf940c33b06.js","39","static/chunks/app/error-58e934428d8fc891.js"],"default"]
-5:I[8924,[],""]
-6:I[3293,["986","static/chunks/986-bc82cbf940c33b06.js","345","static/chunks/app/not-found-173e5c10577db78c.js"],"default"]
-7:I[1081,["992","static/chunks/bc9e92e6-2ef0a3575fa56451.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","673","static/chunks/673-de5e75f798db4c43.js","177","static/chunks/app/layout-b132996f9ade1f93.js"],"default"]
-8:I[107,["992","static/chunks/bc9e92e6-2ef0a3575fa56451.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","673","static/chunks/673-de5e75f798db4c43.js","177","static/chunks/app/layout-b132996f9ade1f93.js"],"default"]
-d:I[7150,[],""]
+7:I[7150,[],""]
 :HL["/_next/static/media/e4af272ccee01ff0-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/_next/static/css/2112710b16617ffb.css","style"]
-9:Tb1b,
+:HL["/_next/static/css/efd988aeaabe4a8a.css","style"]
+2:Tdff,
               (function() {
                 if (typeof window !== 'undefined' && !window.__JSON_STRINGIFY_PATCHED__) {
                   window.__JSON_STRINGIFY_PATCHED__ = true;
                   var originalStringify = JSON.stringify;
                   JSON.stringify = function(value, replacer, space) {
-                    var seen = new WeakSet();
-                    var customReplacer = function(key, val) {
-                      var resolvedValue = val;
-                      if (typeof replacer === 'function') {
-                        resolvedValue = replacer.call(this, key, val);
-                      }
-                      if (typeof resolvedValue === 'object' && resolvedValue !== null) {
-                        if (seen.has(resolvedValue)) {
-                          return '[Circular]';
-                        }
-                        try {
-                          var constructorName = resolvedValue.constructor ? resolvedValue.constructor.name : '';
-                          var isReactOrDOM = 
-                            String(key).indexOf('__react') === 0 ||
-                            resolvedValue.$$typeof ||
-                            constructorName === 'FiberNode' ||
-                            (constructorName && constructorName.indexOf('Fiber') !== -1) ||
-                            constructorName === 'SyntheticBaseEvent' ||
-                            (constructorName && constructorName.indexOf('Element') !== -1) ||
-                            (constructorName && constructorName.indexOf('HTML') !== -1) ||
-                            (constructorName && constructorName.indexOf('Window') !== -1) ||
-                            (constructorName && constructorName.indexOf('Document') !== -1) ||
-                            resolvedValue.nodeType ||
-                            resolvedValue.nodeName;
-
-                          if (isReactOrDOM) {
-                            return '[' + (constructorName || 'ComplexObject') + ']';
+                    try {
+                      return originalStringify(value, replacer, space);
+                    } catch (err) {
+                      var isCircular = err instanceof Error && 
+                        (err.message.indexOf('circular') !== -1 || err.message.indexOf('Circular') !== -1);
+                      if (isCircular) {
+                        var seen = new WeakSet();
+                        var safeReplacer = function(key, val) {
+                          var resolvedValue = val;
+                          if (typeof replacer === 'function') {
+                            resolvedValue = replacer.call(this, key, val);
                           }
-                        } catch (e) {
-                          return '[Restricted]';
+                          if (typeof resolvedValue === 'object' && resolvedValue !== null) {
+                            if (seen.has(resolvedValue)) {
+                              return '[Circular]';
+                            }
+                            try {
+                              var constructorName = resolvedValue.constructor ? resolvedValue.constructor.name : '';
+                              var isReactOrDOM = 
+                                String(key).indexOf('__react') === 0 ||
+                                resolvedValue.$$typeof ||
+                                constructorName === 'FiberNode' ||
+                                (constructorName && constructorName.indexOf('Fiber') !== -1) ||
+                                constructorName === 'SyntheticBaseEvent' ||
+                                (constructorName && constructorName.indexOf('Element') !== -1) ||
+                                (constructorName && constructorName.indexOf('HTML') !== -1) ||
+                                (constructorName && constructorName.indexOf('Window') !== -1) ||
+                                (constructorName && constructorName.indexOf('Document') !== -1) ||
+                                resolvedValue.nodeType ||
+                                resolvedValue.nodeName;
+
+                              if (isReactOrDOM) {
+                                return '[' + (constructorName || 'ComplexObject') + ']';
+                              }
+                            } catch (e) {
+                              return '[Restricted]';
+                            }
+                            seen.add(resolvedValue);
+                          }
+                          if (Array.isArray(replacer) && key !== '') {
+                            if (replacer.indexOf(key) === -1) {
+                              return undefined;
+                            }
+                          }
+                          return resolvedValue;
+                        };
+                        try {
+                          return originalStringify(value, safeReplacer, space);
+                        } catch (secondErr) {
+                          return '"[Unserializable]"';
                         }
-                        seen.add(resolvedValue);
                       }
-                      if (Array.isArray(replacer) && key !== '') {
-                        if (replacer.indexOf(key) === -1) {
-                          return undefined;
-                        }
-                      }
-                      return resolvedValue;
-                    };
-                    return originalStringify(value, customReplacer, space);
+                      throw err;
+                    }
                   };
                 }
               })();
@@ -65,21 +71,29 @@ d:I[7150,[],""]
                   navigator.serviceWorker.register('/sw.js');
                 });
               }
-            0:{"P":null,"b":"P3tdyWaxZV3EySjjiyA1c","p":"","c":["","item"],"i":false,"f":[[["",{"children":["item",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/2112710b16617ffb.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"ka","children":["$","body",null,{"className":"antialiased","children":[["$","$L2",null,{"children":[["$","$L3",null,{"parallelRouterKey":"children","error":"$4","errorStyles":[],"errorScripts":[],"template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","$L6",null,{}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}],["$","$L7",null,{}],["$","$L8",null,{}]]}],["$","script",null,{"dangerouslySetInnerHTML":{"__html":"$9"}}]]}]}]]}],{"children":["item","$La",{"children":["__PAGE__","$Lb",{},null,false]},null,false]},null,false],"$Lc",false]],"m":"$undefined","G":["$d",[]],"s":false,"S":true}
-e:I[1959,[],"ClientPageRoot"]
-f:I[8329,["992","static/chunks/bc9e92e6-2ef0a3575fa56451.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","673","static/chunks/673-de5e75f798db4c43.js","758","static/chunks/758-b34306ba37fa759d.js","648","static/chunks/648-8853511a025bacbc.js","714","static/chunks/714-a0ecdd12f0d8c7aa.js","236","static/chunks/app/item/page-26b6643bce7aec7d.js"],"default"]
-12:I[4431,[],"OutletBoundary"]
-14:I[5278,[],"AsyncMetadataOutlet"]
-16:I[4431,[],"ViewportBoundary"]
-18:I[4431,[],"MetadataBoundary"]
-19:"$Sreact.suspense"
-a:["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}]
-b:["$","$1","c",{"children":[["$","$Le",null,{"Component":"$f","searchParams":{},"params":{},"promises":["$@10","$@11"]}],null,["$","$L12",null,{"children":["$L13",["$","$L14",null,{"promise":"$@15"}]]}]]}]
-c:["$","$1","h",{"children":[null,[["$","$L16",null,{"children":"$L17"}],["$","meta",null,{"name":"next-size-adjust","content":""}]],["$","$L18",null,{"children":["$","div",null,{"hidden":true,"children":["$","$19",null,{"fallback":null,"children":"$L1a"}]}]}]]}]
-10:{}
-11:"$b:props:children:0:props:params"
-17:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-13:null
-1b:I[622,[],"IconMark"]
-15:{"metadata":[["$","title","0",{"children":"Poti.ge"}],["$","meta","1",{"name":"description","content":"City Directory for Poti"}],["$","link","2",{"rel":"manifest","href":"/manifest.json","crossOrigin":"$undefined"}],["$","meta","3",{"name":"mobile-web-app-capable","content":"yes"}],["$","meta","4",{"name":"apple-mobile-web-app-title","content":"Poti.ge"}],["$","meta","5",{"name":"apple-mobile-web-app-status-bar-style","content":"default"}],["$","link","6",{"rel":"icon","href":"/fav.png"}],["$","link","7",{"rel":"apple-touch-icon","href":"/fav.png"}],["$","$L1b","8",{}]],"error":null,"digest":"$undefined"}
-1a:"$15:metadata"
+            0:{"P":null,"b":"WlcFhAL0G8jyNumt4Yr9n","p":"","c":["","item"],"i":false,"f":[[["",{"children":["item",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/efd988aeaabe4a8a.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"ka","children":["$","body",null,{"className":"antialiased","children":[["$","script",null,{"dangerouslySetInnerHTML":{"__html":"$2"}}],"$L3"]}]}]]}],{"children":["item","$L4",{"children":["__PAGE__","$L5",{},null,false]},null,false]},null,false],"$L6",false]],"m":"$undefined","G":["$7",[]],"s":false,"S":true}
+8:I[6174,["992","static/chunks/bc9e92e6-2ef0a3575fa56451.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","248","static/chunks/248-ba82e77fd443d7c5.js","177","static/chunks/app/layout-c0f3aba2bab6b44f.js"],"ThemeProvider"]
+9:I[9766,[],""]
+a:I[3194,["986","static/chunks/986-bc82cbf940c33b06.js","39","static/chunks/app/error-58e934428d8fc891.js"],"default"]
+b:I[8924,[],""]
+c:I[3293,["986","static/chunks/986-bc82cbf940c33b06.js","345","static/chunks/app/not-found-173e5c10577db78c.js"],"default"]
+d:I[1081,["992","static/chunks/bc9e92e6-2ef0a3575fa56451.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","248","static/chunks/248-ba82e77fd443d7c5.js","177","static/chunks/app/layout-c0f3aba2bab6b44f.js"],"default"]
+e:I[107,["992","static/chunks/bc9e92e6-2ef0a3575fa56451.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","248","static/chunks/248-ba82e77fd443d7c5.js","177","static/chunks/app/layout-c0f3aba2bab6b44f.js"],"default"]
+f:I[1959,[],"ClientPageRoot"]
+10:I[7928,["992","static/chunks/bc9e92e6-2ef0a3575fa56451.js","811","static/chunks/ae6eea6a-989a34551986aacb.js","986","static/chunks/986-bc82cbf940c33b06.js","248","static/chunks/248-ba82e77fd443d7c5.js","758","static/chunks/758-b34306ba37fa759d.js","772","static/chunks/772-925e4d9d5472a122.js","907","static/chunks/907-bf0b1671d3e4eac6.js","236","static/chunks/app/item/page-ad68fff88582f564.js"],"default"]
+13:I[4431,[],"OutletBoundary"]
+15:I[5278,[],"AsyncMetadataOutlet"]
+17:I[4431,[],"ViewportBoundary"]
+19:I[4431,[],"MetadataBoundary"]
+1a:"$Sreact.suspense"
+3:["$","$L8",null,{"children":[["$","$L9",null,{"parallelRouterKey":"children","error":"$a","errorStyles":[],"errorScripts":[],"template":["$","$Lb",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","$Lc",null,{}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}],["$","$Ld",null,{}],["$","$Le",null,{}]]}]
+4:["$","$1","c",{"children":[null,["$","$L9",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$Lb",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}]
+5:["$","$1","c",{"children":[["$","$Lf",null,{"Component":"$10","searchParams":{},"params":{},"promises":["$@11","$@12"]}],null,["$","$L13",null,{"children":["$L14",["$","$L15",null,{"promise":"$@16"}]]}]]}]
+6:["$","$1","h",{"children":[null,[["$","$L17",null,{"children":"$L18"}],["$","meta",null,{"name":"next-size-adjust","content":""}]],["$","$L19",null,{"children":["$","div",null,{"hidden":true,"children":["$","$1a",null,{"fallback":null,"children":"$L1b"}]}]}]]}]
+11:{}
+12:"$5:props:children:0:props:params"
+18:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+14:null
+1c:I[622,[],"IconMark"]
+16:{"metadata":[["$","title","0",{"children":"Poti.ge"}],["$","meta","1",{"name":"description","content":"City Directory for Poti"}],["$","link","2",{"rel":"manifest","href":"/manifest.json","crossOrigin":"$undefined"}],["$","meta","3",{"name":"mobile-web-app-capable","content":"yes"}],["$","meta","4",{"name":"apple-mobile-web-app-title","content":"Poti.ge"}],["$","meta","5",{"name":"apple-mobile-web-app-status-bar-style","content":"default"}],["$","link","6",{"rel":"icon","href":"/fav.png"}],["$","link","7",{"rel":"apple-touch-icon","href":"/fav.png"}],["$","$L1c","8",{}]],"error":null,"digest":"$undefined"}
+1b:"$16:metadata"

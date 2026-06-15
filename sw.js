@@ -1,4 +1,4 @@
-const CACHE_NAME = 'poti-v3';
+const CACHE_NAME = 'poti-v5';
 const ASSETS = [
   '/',
   '/globals.css',
@@ -34,19 +34,52 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip api routes and firebase firestore traffic
-  if (event.request.url.includes('/api/') || event.request.url.includes('firestore.googleapis.com')) {
+  // Skip Next.js system requests, static chunks, hot-reload, api routes, and firebase firestore traffic
+  if (
+    event.request.url.includes('/_next/') ||
+    event.request.url.includes('/api/') ||
+    event.request.url.includes('firestore.googleapis.com') ||
+    event.request.url.includes('webpack')
+  ) {
     return;
   }
 
+  // For navigate / HTML requests, use Network-First strategy
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // Offline fallback
+          return caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            return caches.match('/');
+          });
+        })
+    );
+    return;
+  }
+
+  // For non-navigate requests (images, assets etc.), use Cache-First with background revalidation
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
         // Fetch fresh copy in the background to keep cache up to date
-        fetch(event.request)
+        fetch(event.request.url)
           .then((networkResponse) => {
             if (networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
             }
           })
           .catch(() => {/* Ignore network errors on background refresh */});
@@ -64,11 +97,6 @@ self.addEventListener('fetch', (event) => {
         });
 
         return networkResponse;
-      }).catch(() => {
-        // Safe offline fallback for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/');
-        }
       });
     })
   );
