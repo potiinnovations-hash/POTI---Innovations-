@@ -110,6 +110,7 @@ export default function CalendarPage() {
             const upcoming = fetchedEvents
               .filter((e: any) => e?.start)
               .map((e: any) => ({ ...e, parsedDate: new Date(e.start) }))
+              .filter((e: any) => !isNaN(e.parsedDate.getTime()))
               .filter((e: any) => e.parsedDate >= now)
               .sort((a: any, b: any) => a.parsedDate.getTime() - b.parsedDate.getTime());
               
@@ -121,6 +122,7 @@ export default function CalendarPage() {
               const sorted = [...fetchedEvents]
                 .filter((e: any) => e?.start)
                 .map((e: any) => ({ ...e, parsedDate: new Date(e.start) }))
+                .filter((e: any) => !isNaN(e.parsedDate.getTime()))
                 .sort((a: any, b: any) => a.parsedDate.getTime() - b.parsedDate.getTime());
               if (sorted.length > 0) {
                 setSelectedEvent(sorted[0]);
@@ -243,17 +245,25 @@ export default function CalendarPage() {
   };
 
   // Helper to see if standard day has events
+  const getSafeDate = (d: any): Date => {
+    if (!d) return new Date();
+    const parsed = d instanceof Date ? d : new Date(d);
+    return (!isNaN(parsed.getTime())) ? parsed : new Date();
+  };
+
   const getEventsForDay = (day: Date) => {
+    if (!day || isNaN(day.getTime())) return [];
     return events.filter(e => {
       if (!e?.start) return false;
       
       // If start is YYYY-MM-DD
-      if (e.start.length === 10) {
+      if (typeof e.start === 'string' && e.start.length === 10) {
         const [y, m, d] = e.start.split('-').map(Number);
         return y === day.getFullYear() && (m - 1) === day.getMonth() && d === day.getDate();
       }
       
       const eStart = new Date(e.start);
+      if (isNaN(eStart.getTime())) return false;
       return eStart.getFullYear() === day.getFullYear() &&
              eStart.getMonth() === day.getMonth() &&
              eStart.getDate() === day.getDate();
@@ -270,6 +280,7 @@ export default function CalendarPage() {
     const sortedEvents = [...events]
       .filter(e => e?.start)
       .map(e => ({ ...e, parsedDate: new Date(e.start) }))
+      .filter(e => !isNaN(e.parsedDate.getTime()))
       .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
 
     // Try starting from today
@@ -283,7 +294,7 @@ export default function CalendarPage() {
   };
 
   const nextPlanned = getNextPlannedEvent();
-  const activeDate = selectedDate || (nextPlanned ? new Date(nextPlanned.start) : new Date());
+  const activeDate = getSafeDate(selectedDate || (nextPlanned ? nextPlanned.parsedDate : null));
   const activeEvents = getEventsForDay(activeDate);
 
 
@@ -501,7 +512,10 @@ export default function CalendarPage() {
                           <span className="inline-block px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-extrabold text-[10px] uppercase rounded-full mb-1">
                             {ev.allDay 
                               ? (lang === 'ka' ? 'მთელი დღე' : 'All Day') 
-                              : `${new Date(ev.start).toLocaleTimeString(lang === 'ka' ? 'ka-GE' : 'en-US', { hour: '2-digit', minute: '2-digit' })}`}
+                              : `${(() => {
+                                  const parsed = new Date(ev.start);
+                                  return !isNaN(parsed.getTime()) ? parsed.toLocaleTimeString(lang === 'ka' ? 'ka-GE' : 'en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+                                })()}`}
                           </span>
                           <h4 className="text-base font-black text-blue-950 dark:text-white leading-snug">
                             {ev.title}

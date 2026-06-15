@@ -25,13 +25,14 @@ function InteractiveMapContent() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [settings, setSettings] = useState<any>({});
   const [catalogItems, setCatalogItems] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Interaction states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [focusedItemId, setFocusedItemId] = useState<string | null>(itemIdParam);
+
+  const categories = catalogItems.filter(item => item.isCategory);
 
   // Initialize theme/lang from localStorage
   useEffect(() => {
@@ -86,12 +87,6 @@ function InteractiveMapContent() {
       handleFirestoreError(err, OperationType.LIST, 'catalog');
     });
 
-    const unsubscribeCategories = onSnapshot(query(collection(db, 'categories'), orderBy('order', 'asc')), (snap) => {
-      setCategories(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => {
-      handleFirestoreError(err, OperationType.LIST, 'categories');
-    });
-
     const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'global'), (d) => {
       if (d.exists()) setSettings(d.data());
       setLoading(false);
@@ -101,14 +96,13 @@ function InteractiveMapContent() {
 
     return () => {
       unsubscribeCatalog();
-      unsubscribeCategories();
       unsubscribeSettings();
     };
   }, []);
 
-  // Filter items that have valid coordinates
+  // Filter items that have valid coordinates and are locations (not categories)
   const itemsWithCoordinates = catalogItems.filter(
-    (item) => item.location && typeof item.location === 'string' && item.location.includes(',')
+    (item) => !item.isCategory && item.location && typeof item.location === 'string' && item.location.includes(',')
   );
 
   // Apply Search & Category filters
@@ -119,7 +113,7 @@ function InteractiveMapContent() {
       title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
       desc?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesCategory = !selectedCategory || item.categoryId === selectedCategory;
+    const matchesCategory = !selectedCategory || item.parentId === selectedCategory;
     
     return matchesSearch && matchesCategory;
   });

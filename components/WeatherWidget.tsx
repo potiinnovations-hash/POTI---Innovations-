@@ -58,7 +58,7 @@ export const WeatherWidget = ({ lang }: WeatherWidgetProps) => {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=42.1461&longitude=41.6720&daily=temperature_2m_max,temperature_2m_min,weather_code,weathercode&timezone=auto');
+        const res = await fetch('/api/weather');
         if (!res.ok) throw new Error(`Weather API returned ${res.status}`);
         const data = await res.json();
         

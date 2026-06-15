@@ -9,6 +9,9 @@ import Footer from '@/components/Footer';
 import LoadingScreen from '@/components/LoadingScreen';
 import { LighthouseBackground } from '@/components/LighthouseBackground';
 import { NotificationBanner } from '@/components/NotificationBanner';
+import { ProjectsActivities } from '@/components/ProjectsActivities';
+import ActivityCalendar from '@/components/ActivityCalendar';
+import NewsSection from '@/components/NewsSection';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Plus, Trash2, Save, LogOut, ArrowLeft, Image as ImageIcon, Bell, Settings, 
@@ -95,15 +98,13 @@ export default function Home() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isInitialized, setIsInitialized] = useState(false);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [activeParentId, setActiveParentId] = useState<string | null>(null);
   const [settings, setSettings] = useState<any>({});
   const [notifications, setNotifications] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [fullPageLoading, setFullPageLoading] = useState(true);
-  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     // Initial loading delay to ensure smooth transition
@@ -241,62 +242,44 @@ export default function Home() {
       }
     );
 
-    const unsubscribeCategories = onSnapshot(
-      query(collection(db, 'categories'), orderBy('order', 'asc')),
-      (snapshot) => {
-        setCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, 'categories');
-      }
-    );
-
     return () => {
       unsubscribeCatalog();
       unsubscribeSettings();
       unsubscribeNotifs();
-      unsubscribeCategories();
     };
   }, []);
 
-  useEffect(() => {
-    const scrollEl = document.getElementById('category-scroll');
-    if (!scrollEl) return;
-
-    const handleScroll = () => {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollEl;
-      const total = scrollWidth - clientWidth;
-      if (total <= 1) { // 1px threshold for stability
-        setScrollProgress(0);
-        return;
-      }
-      setScrollProgress(scrollLeft / total);
-    };
-
-    scrollEl.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
-    return () => scrollEl.removeEventListener('scroll', handleScroll);
-  }, [categories, loading]);
-
-  const handleCategoryClick = (catId: string | null, index: number) => {
-    setSelectedCategoryId(catId);
-    const scrollEl = document.getElementById('category-scroll');
-    if (scrollEl) {
-      const buttonEl = scrollEl.children[index] as HTMLElement;
-      if (buttonEl) {
-        const scrollHalfWidth = scrollEl.clientWidth / 2;
-        const buttonHalfWidth = buttonEl.clientWidth / 2;
-        const targetScrollLeft = buttonEl.offsetLeft - scrollHalfWidth + buttonHalfWidth;
-        scrollEl.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+  const getBreadcrumbs = () => {
+    const list: any[] = [];
+    let currentId = activeParentId;
+    while (currentId) {
+      const item = catalogItems.find(i => i.id === currentId);
+      if (item) {
+        list.unshift(item);
+        currentId = item.parentId || null;
+      } else {
+        break;
       }
     }
+    return list;
   };
 
   const filteredItems = catalogItems.filter(item => {
     const title = lang === 'ka' ? item.titleKa : item.titleEn;
-    const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategoryId ? item.categoryId === selectedCategoryId : true;
-    return matchesSearch && matchesCategory;
+    const desc = lang === 'ka' ? item.descriptionKa : item.descriptionEn;
+    const matchesSearch = searchTerm 
+      ? title.toLowerCase().includes(searchTerm.toLowerCase()) || (desc && desc.toLowerCase().includes(searchTerm.toLowerCase()))
+      : true;
+
+    if (searchTerm) {
+      return matchesSearch && !item.isCategory;
+    }
+
+    const itemParentId = item.parentId || null;
+    if (activeParentId === null) {
+      return !!item.isCategory && (itemParentId === null || itemParentId === '');
+    }
+    return itemParentId === activeParentId;
   });
 
   return (
@@ -375,64 +358,71 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Categories Row */}
-              <div className="relative group max-w-5xl mx-auto mt-2">
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="flex items-center gap-3 overflow-x-auto pb-4 px-4 md:px-12 no-scrollbar touch-pan-x relative"
-                  id="category-scroll"
-                >
-                  <motion.button 
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleCategoryClick(null, 0)}
-                    className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${!selectedCategoryId ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
-                  >
-                    <Globe size={18} />
-                    {lang === 'ka' ? 'ყველა' : 'All'}
-                  </motion.button>
-                  {categories.map((cat, idx) => (
-                    <motion.button 
-                      key={cat.id}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleCategoryClick(cat.id, idx + 1)}
-                      className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-6 py-3 rounded-full font-black text-sm transition-all border-2 ${selectedCategoryId === cat.id ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-primary/50'}`}
-                    >
-                      {iconMap[cat.icon] ? React.createElement(iconMap[cat.icon], { size: 18 }) : <Globe size={18} />}
-                      {lang === 'ka' ? cat.titleKa : cat.titleEn}
-                    </motion.button>
-                  ))}
-                </motion.div>
-
-                {/* Pagination Pins */}
-                <div className="flex justify-center flex-wrap gap-1.5 mt-6 px-4">
-                  {[{ id: null, titleKa: 'ყველა', titleEn: 'All' }, ...categories].map((cat, i) => {
-                    const active = cat.id === selectedCategoryId;
-                    return (
-                      <button 
-                        key={cat.id || 'all'}
-                        onClick={() => handleCategoryClick(cat.id, i)}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${active ? 'w-6 bg-primary' : 'w-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
-                        title={lang === 'ka' ? cat.titleKa : cat.titleEn}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
             </div>
           </section>
 
           {/* Catalog Section */}
           <section className="container mx-auto px-4 pb-24">
+            {/* Breadcrumbs / Back Navigation */}
+            {activeParentId && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-slate-50 dark:bg-slate-900/40 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-900/60 transition-colors max-w-5xl mx-auto">
+                <div className="flex items-center gap-2 flex-wrap text-sm font-bold text-slate-500 dark:text-slate-400">
+                  <button 
+                    onClick={() => setActiveParentId(null)}
+                    className="hover:text-primary transition-colors hover:underline"
+                  >
+                    {lang === 'ka' ? 'მთავარი' : 'Home'}
+                  </button>
+                  {getBreadcrumbs().map((b, idx, arr) => (
+                    <React.Fragment key={b.id}>
+                      <span className="text-slate-300 dark:text-slate-700">/</span>
+                      <button
+                        onClick={() => setActiveParentId(b.id)}
+                        className={`transition-colors hover:underline ${idx === arr.length - 1 ? 'text-slate-900 dark:text-white font-black' : 'hover:text-primary'}`}
+                        disabled={idx === arr.length - 1}
+                      >
+                        {lang === 'ka' ? b.titleKa : b.titleEn}
+                      </button>
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => {
+                    const currentParent = catalogItems.find(i => i.id === activeParentId);
+                    setActiveParentId(currentParent?.parentId || null);
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl font-black text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 active:scale-95 transition-all shadow-sm"
+                >
+                  <ArrowLeft size={16} />
+                  {lang === 'ka' ? 'უკან' : 'Back'}
+                </button>
+              </div>
+            )}
+
             {loading ? (
               <div className="flex justify-center py-20">
                 <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (
-              <Catalog items={filteredItems} lang={lang} itemsPerRow={4} settings={settings} />
+              <Catalog 
+                items={filteredItems} 
+                lang={lang} 
+                itemsPerRow={4} 
+                settings={settings} 
+                onCategoryClick={(id) => setActiveParentId(id)} 
+              />
             )}
           </section>
+
+          {/* Projects and Activities Section - Only on main homepage */}
+          {!activeParentId && !loading && (
+            <>
+              <ProjectsActivities lang={lang} />
+              <ActivityCalendar lang={lang} />
+              <NewsSection lang={lang} />
+            </>
+          )}
 
           <Footer lang={lang} />
         </motion.main>

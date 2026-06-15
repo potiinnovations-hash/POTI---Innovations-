@@ -19,7 +19,7 @@ interface CatalogTabProps {
   confirmDeleteId: string | null;
   setConfirmDeleteId: (id: string | null) => void;
   translatingId: string | null;
-  handleAddCatalogItem: () => void;
+  handleAddCatalogItem: (isCategory?: boolean) => void;
   handleDeleteCatalogItem: (id: string, e?: React.MouseEvent) => void;
   handleUpdateCatalogItem: (id: string, data: any) => void;
   handleTranslate: (id: string, text: string, field: any) => void;
@@ -69,13 +69,13 @@ export const CatalogTab = ({
 
   return (
     <div className="space-y-12">
-      <header className="flex justify-between items-end">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <div>
           <h2 className="text-5xl font-black text-slate-900 tracking-tight mb-2">კატალოგი</h2>
           <p className="text-slate-500 font-bold text-lg">მართეთ ქალაქის ლოკაციები და სერვისები</p>
         </div>
         <button 
-          onClick={handleAddCatalogItem}
+          onClick={() => handleAddCatalogItem(false)}
           className="flex items-center gap-3 px-8 py-5 bg-blue-600 text-white rounded-[2rem] font-black hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 active:scale-95"
         >
           <Plus size={24} /> ახალი ლოკაცია
@@ -127,9 +127,15 @@ export const CatalogTab = ({
                   <h3 className="text-xl font-bold text-slate-900 truncate">
                     {item.titleKa}
                   </h3>
-                  <p className="text-slate-400 text-sm font-bold truncate">
-                    {categories.find(c => c.id === item.categoryId)?.titleKa || 'კატეგორიის გარეშე'}
-                  </p>
+                  <div className="text-slate-400 text-sm font-bold truncate flex items-center gap-1.5 mt-1">
+                    {item.isCategory ? (
+                      <span className="text-blue-600 bg-blue-50 dark:bg-blue-950/20 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">კატეგორია</span>
+                    ) : (
+                      <span className="text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">ლოკაცია</span>
+                    )}
+                    <span className="text-slate-300">|</span>
+                    <span>{item.parentId ? `მშობელი: ${catalogItems.find(c => c.id === item.parentId)?.titleKa || 'წაშლილი'}` : 'მთავარ გვერდზე'}</span>
+                  </div>
                 </div>
               </div>
               
@@ -242,24 +248,46 @@ export const CatalogTab = ({
                         </div>
 
                         <div className="space-y-8">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">კატეგორია</label>
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">ტიპი (Type)</label>
+                              <div className="flex bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800 gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateCatalogItem(item.id, { isCategory: false })}
+                                  className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer ${!item.isCategory ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-white dark:hover:bg-slate-800'}`}
+                                >
+                                  ლოკაცია
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateCatalogItem(item.id, { isCategory: true })}
+                                  className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer ${item.isCategory ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-white dark:hover:bg-slate-800'}`}
+                                >
+                                  კატეგორია
+                                </button>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">მშობელი კატეგორია (Parent)</label>
                               <select 
-                                className="w-full bg-white border-none p-4 rounded-2xl font-bold text-slate-900 appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 shadow-sm"
-                                value={item.categoryId || ''}
-                                onChange={(e) => handleUpdateCatalogItem(item.id, { categoryId: e.target.value })}
+                                className="w-full bg-white dark:bg-slate-950 border-none p-4 rounded-2xl font-bold text-slate-900 dark:text-white appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 shadow-sm"
+                                value={item.parentId || ''}
+                                onChange={(e) => handleUpdateCatalogItem(item.id, { parentId: e.target.value })}
                               >
-                                <option value="">აირჩიეთ კატეგორია</option>
-                                {categories.map(cat => (
-                                  <option key={cat.id} value={cat.id}>{cat.titleKa}</option>
+                                <option value="">მთავარ გვერდზე (Root)</option>
+                                {categories.filter((c: any) => c.id !== item.id).map((parent: any) => (
+                                  <option key={parent.id} value={parent.id}>{parent.titleKa}</option>
                                 ))}
                               </select>
                             </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">ფასი / ტარიფი</label>
                               <input 
-                                className="w-full bg-white border-none p-4 rounded-2xl font-bold text-slate-900 shadow-sm"
+                                className="w-full bg-white border-none p-4 rounded-2xl font-bold text-slate-900 shadow-sm animate-fadeIn"
                                 value={item.price || ''}
                                 onChange={(e) => handleUpdateCatalogItem(item.id, { price: e.target.value })}
                               />

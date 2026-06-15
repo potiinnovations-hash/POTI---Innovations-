@@ -32,6 +32,8 @@ export interface CatalogItem {
   email?: string;
   showWebsite?: boolean;
   titleColor?: string;
+  isCategory?: boolean;
+  parentId?: string;
   ctaButton?: {
     textKa: string;
     textEn: string;
@@ -45,13 +47,21 @@ interface CatalogProps {
   lang: 'ka' | 'en';
   itemsPerRow?: number;
   settings?: any;
+  onCategoryClick?: (id: string) => void;
 }
 
-export const Catalog = ({ items, lang, itemsPerRow = 4, settings = {} }: CatalogProps) => {
+export const Catalog = ({ items, lang, itemsPerRow = 4, settings = {}, onCategoryClick }: CatalogProps) => {
   const [showDevMessage, setShowDevMessage] = React.useState(false);
   const router = useRouter();
 
   const handleItemClick = (item: CatalogItem) => {
+    if (item.isCategory) {
+      if (onCategoryClick) {
+        onCategoryClick(item.id);
+      }
+      return;
+    }
+
     if (item.isUnderDevelopment) {
       setShowDevMessage(true);
       return;

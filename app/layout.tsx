@@ -33,11 +33,6 @@ export default function RootLayout({
   return (
     <html lang="ka">
       <body className="antialiased">
-        <ThemeProvider>
-          {children}
-          <MenuWidget />
-          <PWAPromptWidget />
-        </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -46,47 +41,60 @@ export default function RootLayout({
                   window.__JSON_STRINGIFY_PATCHED__ = true;
                   var originalStringify = JSON.stringify;
                   JSON.stringify = function(value, replacer, space) {
-                    var seen = new WeakSet();
-                    var customReplacer = function(key, val) {
-                      var resolvedValue = val;
-                      if (typeof replacer === 'function') {
-                        resolvedValue = replacer.call(this, key, val);
-                      }
-                      if (typeof resolvedValue === 'object' && resolvedValue !== null) {
-                        if (seen.has(resolvedValue)) {
-                          return '[Circular]';
-                        }
-                        try {
-                          var constructorName = resolvedValue.constructor ? resolvedValue.constructor.name : '';
-                          var isReactOrDOM = 
-                            String(key).indexOf('__react') === 0 ||
-                            resolvedValue.$$typeof ||
-                            constructorName === 'FiberNode' ||
-                            (constructorName && constructorName.indexOf('Fiber') !== -1) ||
-                            constructorName === 'SyntheticBaseEvent' ||
-                            (constructorName && constructorName.indexOf('Element') !== -1) ||
-                            (constructorName && constructorName.indexOf('HTML') !== -1) ||
-                            (constructorName && constructorName.indexOf('Window') !== -1) ||
-                            (constructorName && constructorName.indexOf('Document') !== -1) ||
-                            resolvedValue.nodeType ||
-                            resolvedValue.nodeName;
-
-                          if (isReactOrDOM) {
-                            return '[' + (constructorName || 'ComplexObject') + ']';
+                    try {
+                      return originalStringify(value, replacer, space);
+                    } catch (err) {
+                      var isCircular = err instanceof Error && 
+                        (err.message.indexOf('circular') !== -1 || err.message.indexOf('Circular') !== -1);
+                      if (isCircular) {
+                        var seen = new WeakSet();
+                        var safeReplacer = function(key, val) {
+                          var resolvedValue = val;
+                          if (typeof replacer === 'function') {
+                            resolvedValue = replacer.call(this, key, val);
                           }
-                        } catch (e) {
-                          return '[Restricted]';
+                          if (typeof resolvedValue === 'object' && resolvedValue !== null) {
+                            if (seen.has(resolvedValue)) {
+                              return '[Circular]';
+                            }
+                            try {
+                              var constructorName = resolvedValue.constructor ? resolvedValue.constructor.name : '';
+                              var isReactOrDOM = 
+                                String(key).indexOf('__react') === 0 ||
+                                resolvedValue.$$typeof ||
+                                constructorName === 'FiberNode' ||
+                                (constructorName && constructorName.indexOf('Fiber') !== -1) ||
+                                constructorName === 'SyntheticBaseEvent' ||
+                                (constructorName && constructorName.indexOf('Element') !== -1) ||
+                                (constructorName && constructorName.indexOf('HTML') !== -1) ||
+                                (constructorName && constructorName.indexOf('Window') !== -1) ||
+                                (constructorName && constructorName.indexOf('Document') !== -1) ||
+                                resolvedValue.nodeType ||
+                                resolvedValue.nodeName;
+
+                              if (isReactOrDOM) {
+                                return '[' + (constructorName || 'ComplexObject') + ']';
+                              }
+                            } catch (e) {
+                              return '[Restricted]';
+                            }
+                            seen.add(resolvedValue);
+                          }
+                          if (Array.isArray(replacer) && key !== '') {
+                            if (replacer.indexOf(key) === -1) {
+                              return undefined;
+                            }
+                          }
+                          return resolvedValue;
+                        };
+                        try {
+                          return originalStringify(value, safeReplacer, space);
+                        } catch (secondErr) {
+                          return '"[Unserializable]"';
                         }
-                        seen.add(resolvedValue);
                       }
-                      if (Array.isArray(replacer) && key !== '') {
-                        if (replacer.indexOf(key) === -1) {
-                          return undefined;
-                        }
-                      }
-                      return resolvedValue;
-                    };
-                    return originalStringify(value, customReplacer, space);
+                      throw err;
+                    }
                   };
                 }
               })();
@@ -99,6 +107,11 @@ export default function RootLayout({
             `,
           }}
         />
+        <ThemeProvider>
+          {children}
+          <MenuWidget />
+          <PWAPromptWidget />
+        </ThemeProvider>
       </body>
     </html>
   );

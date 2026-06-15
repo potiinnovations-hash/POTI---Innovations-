@@ -5,7 +5,7 @@ import { onAuthStateChanged, User, GoogleAuthProvider, signInWithPopup } from 'f
 import { collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, updateDoc, query, orderBy, getDoc } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '@/firebase';
 import { 
-  Plus, Trash2, Save, LogOut, ArrowLeft, Image as ImageIcon, Bell, Settings, 
+  Plus, Trash2, Save, LogOut, ArrowLeft, Image as ImageIcon, Bell, Settings, FolderTree,
   Sparkles, Calendar, UserPlus, MapPin, Phone, Globe, ExternalLink, Mail, Facebook, MessageSquare, Info, ArrowRight,
   Palette,
   Dumbbell, Trophy, Bus, Car, Plane, Ship, GraduationCap, Book, Waves, Anchor, Fish, Building2, Landmark, Utensils, HeartPulse, Stethoscope, Ticket, Music,
@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { motion, AnimatePresence } from 'motion/react';
 
 import { CatalogTab } from '@/components/admin/CatalogTab';
@@ -24,6 +23,8 @@ import { SettingsTab } from '@/components/admin/SettingsTab';
 import { CalendarTab } from '@/components/admin/CalendarTab';
 import { ServicesTab } from '@/components/admin/ServicesTab';
 import { PWATab } from '@/components/admin/PWATab';
+import { InitiativesTab } from '@/components/admin/InitiativesTab';
+import { InitiativeCategoriesTab } from '@/components/admin/InitiativeCategoriesTab';
 
 const iconMap: Record<string, any> = {
   Calendar,
@@ -103,8 +104,7 @@ export default function AdminPage() {
   const [catalogItems, setCatalogItems] = useState<any[]>([]);
   const [globalSettings, setGlobalSettings] = useState<any>({});
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [activeTab, setActiveTab ] = useState<'catalog' | 'settings' | 'notifications' | 'categories' | 'news' | 'calendar' | 'services' | 'pwa'>('catalog');
+  const [activeTab, setActiveTab ] = useState<'catalog' | 'categories' | 'settings' | 'notifications' | 'news' | 'calendar' | 'services' | 'pwa' | 'initiatives' | 'initiative_categories'>('catalog');
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState<'KA' | 'EN'>('KA');
@@ -112,6 +112,8 @@ export default function AdminPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [outages, setOutages] = useState<any[]>([]);
+  const [initiatives, setInitiatives] = useState<any[]>([]);
+  const [initiativeCategories, setInitiativeCategories] = useState<any[]>([]);
 
   // Local effect to preview fonts in admin immediately
   useEffect(() => {
@@ -219,14 +221,6 @@ export default function AdminPage() {
       handleFirestoreError(err, OperationType.LIST, 'notifications');
     });
 
-    const unsubscribeCategories = onSnapshot(query(collection(db, 'categories'), orderBy('order', 'asc')), (snap) => {
-      setCategories(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    }, (err) => {
-      setLoading(false);
-      handleFirestoreError(err, OperationType.LIST, 'categories');
-    });
-
     const unsubscribeNews = onSnapshot(query(collection(db, 'news'), orderBy('createdAt', 'desc')), (snap) => {
       setNews(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
@@ -253,14 +247,31 @@ export default function AdminPage() {
       handleFirestoreError(err, OperationType.LIST, 'outages');
     });
 
+    const unsubscribeInitiatives = onSnapshot(query(collection(db, 'initiatives'), orderBy('order', 'asc')), (snap) => {
+      setInitiatives(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setLoading(false);
+    }, (err) => {
+      setLoading(false);
+      handleFirestoreError(err, OperationType.LIST, 'initiatives');
+    });
+
+    const unsubscribeInitCats = onSnapshot(query(collection(db, 'initiative_categories'), orderBy('order', 'asc')), (snap) => {
+      setInitiativeCategories(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setLoading(false);
+    }, (err) => {
+      setLoading(false);
+      handleFirestoreError(err, OperationType.LIST, 'initiative_categories');
+    });
+
     return () => {
       unsubscribeCatalog();
       unsubscribeSettings();
       unsubscribeNotifs();
-      unsubscribeCategories();
       unsubscribeNews();
       unsubscribeEvents();
       unsubscribeOutages();
+      unsubscribeInitiatives();
+      unsubscribeInitCats();
     };
   }, [isAdmin]);
 
@@ -346,17 +357,17 @@ export default function AdminPage() {
     }
   };
 
-  const handleAddCatalogItem = async () => {
+  const handleAddCatalogItem = async (isCategory: boolean = false) => {
     const newItem = {
-      titleKa: 'ახალი ლოკაცია',
-      titleEn: 'New Location',
-      categoryId: categories[0]?.id || '',
+      titleKa: isCategory ? 'ახალი კატეგორია' : 'ახალი ლოკაცია',
+      titleEn: isCategory ? 'New Category' : 'New Location',
+      isCategory: isCategory,
+      parentId: '',
       imageUrl: 'https://picsum.photos/seed/poti/800/600',
       targetUrl: '',
-      descriptionKa: 'აღწერა...',
-      descriptionEn: 'Description...',
+      descriptionKa: isCategory ? 'კატეგორიის აღწერა...' : 'აღწერა...',
+      descriptionEn: isCategory ? 'Category description...' : 'Description...',
       order: catalogItems.length,
-      category: 'სერვისი',
       price: '',
       location: 'ფოთი, საქართველო',
       addressKa: '',
@@ -456,20 +467,123 @@ export default function AdminPage() {
     }
   };
 
-  const handleTranslate = async (id: string, textKa: string, field: string, collectionName: 'catalog' | 'news' | 'outages' = 'catalog') => {
-    if (!textKa || !process.env.NEXT_PUBLIC_GEMINI_API_KEY) return;
+  const handleAddInitiative = async () => {
+    const newItem = {
+      titleKa: 'ახალი პროექტი / აქტივობა',
+      titleEn: 'New Project / Activity',
+      descKa: 'მოკლე აღწერა...',
+      descEn: 'Short description...',
+      fullDetailsKa: 'სრული აღწერა ქართულად...',
+      fullDetailsEn: 'Full details description in English...',
+      tag: 'projects',
+      categoryId: '',
+      icon: 'Briefcase',
+      color: 'from-emerald-500 to-teal-600',
+      imageUrl: '',
+      ctaTextKa: 'განვრცობა',
+      ctaTextEn: 'Read More',
+      ctaUrl: '',
+      ctaIcon: 'ExternalLink',
+      order: initiatives.length,
+      createdAt: new Date().toISOString()
+    };
+    try {
+      await addDoc(collection(db, 'initiatives'), newItem);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.CREATE, 'initiatives');
+    }
+  };
+
+  const handleUpdateInitiative = async (id: string, data: any) => {
+    try {
+      await updateDoc(doc(db, 'initiatives', id), data);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `initiatives/${id}`);
+    }
+  };
+
+  const handleDeleteInitiative = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!id) return;
+    try {
+      await deleteDoc(doc(db, 'initiatives', id));
+      if (editingId === id) setEditingId(null);
+      setConfirmDeleteId(null);
+    } catch (err: any) {
+      handleFirestoreError(err, OperationType.DELETE, `initiatives/${id}`);
+    }
+  };
+
+  const handleAddInitiativeCategory = async () => {
+    const newItem = {
+      titleKa: 'ახალი კატეგორია',
+      titleEn: 'New Category',
+      tag: 'projects',
+      icon: 'Briefcase',
+      order: initiativeCategories.length
+    };
+    try {
+      await addDoc(collection(db, 'initiative_categories'), newItem);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.CREATE, 'initiative_categories');
+    }
+  };
+
+  const handleUpdateInitiativeCategory = async (id: string, data: any) => {
+    try {
+      await updateDoc(doc(db, 'initiative_categories', id), data);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `initiative_categories/${id}`);
+    }
+  };
+
+  const handleDeleteInitiativeCategory = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!id) return;
+    try {
+      await deleteDoc(doc(db, 'initiative_categories', id));
+      if (editingId === id) setEditingId(null);
+      setConfirmDeleteId(null);
+    } catch (err: any) {
+      handleFirestoreError(err, OperationType.DELETE, `initiative_categories/${id}`);
+    }
+  };
+
+  const handleTranslate = async (id: string, textKa: string, field: string, collectionName: 'catalog' | 'news' | 'outages' | 'initiatives' | 'initiative_categories' = 'catalog') => {
+    if (!textKa) return;
     setTranslatingId(id);
     try {
-      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      const prompt = `Translate the following Georgian text to English. Return ONLY the translated text: "${textKa}"`;
-      const result = await model.generateContent(prompt);
-      const translated = result.response.text().trim();
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: textKa,
+          sourceLang: 'Georgian',
+          targetLang: 'English'
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error(`API returned HTTP status ${res.status}`);
+      }
+
+      const data = await res.json();
+      const translated = (data.translatedText || '').trim();
+
+      if (!translated) {
+        throw new Error("Translation came back empty");
+      }
       
       if (collectionName === 'news') {
         await handleUpdateNews(id, { [field]: translated });
       } else if (collectionName === 'outages') {
         await handleUpdateOutage(id, { [field]: translated });
+      } else if (collectionName === 'initiatives') {
+        await handleUpdateInitiative(id, { [field]: translated });
+      } else if (collectionName === 'initiative_categories') {
+        await handleUpdateInitiativeCategory(id, { [field]: translated });
       } else {
         await handleUpdateCatalogItem(id, { [field]: translated });
       }
@@ -591,6 +705,13 @@ export default function AdminPage() {
           </motion.button>
           <motion.button 
             whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab('categories')}
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'categories' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <FolderTree size={22} /> კატეგორიები
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab('notifications')}
             className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'notifications' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
           >
@@ -605,10 +726,17 @@ export default function AdminPage() {
           </motion.button>
           <motion.button 
             whileTap={{ scale: 0.98 }}
-            onClick={() => setActiveTab('categories')}
-            className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'categories' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
+            onClick={() => setActiveTab('initiatives')}
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'initiatives' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
           >
-            <Plus size={22} /> კატეგორიები
+            <Briefcase size={22} /> პროექტები
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab('initiative_categories')}
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-black transition-all ${activeTab === 'initiative_categories' ? 'bg-blue-600 text-white shadow-xl shadow-blue-100 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <FolderTree size={22} /> პროექტების კატეგორიები
           </motion.button>
           <motion.button 
             whileTap={{ scale: 0.98 }}
@@ -654,8 +782,8 @@ export default function AdminPage() {
         <div className="max-w-5xl mx-auto">
           {activeTab === 'catalog' && (
             <CatalogTab 
-              catalogItems={catalogItems}
-              categories={categories}
+              catalogItems={catalogItems.filter((item: any) => !item.isCategory)}
+              categories={catalogItems.filter((item: any) => item.isCategory)}
               editingId={editingId}
               setEditingId={setEditingId}
               editMode={editMode}
@@ -666,6 +794,25 @@ export default function AdminPage() {
               handleAddCatalogItem={handleAddCatalogItem}
               handleDeleteCatalogItem={handleDeleteCatalogItem}
               handleUpdateCatalogItem={handleUpdateCatalogItem}
+              handleTranslate={(id, text, field) => handleTranslate(id, text, field, 'catalog')}
+              handleImageUpload={handleImageUpload}
+            />
+          )}
+
+          {activeTab === 'categories' && (
+            <CategoriesTab 
+              categories={catalogItems.filter((item: any) => item.isCategory)}
+              allCatalogItems={catalogItems}
+              editingId={editingId}
+              setEditingId={setEditingId}
+              editMode={editMode}
+              setEditMode={setEditMode}
+              confirmDeleteId={confirmDeleteId}
+              setConfirmDeleteId={setConfirmDeleteId}
+              translatingId={translatingId}
+              handleAddCategory={() => handleAddCatalogItem(true)}
+              handleDeleteCategory={handleDeleteCatalogItem}
+              handleUpdateCategory={handleUpdateCatalogItem}
               handleTranslate={(id, text, field) => handleTranslate(id, text, field, 'catalog')}
               handleImageUpload={handleImageUpload}
             />
@@ -688,6 +835,38 @@ export default function AdminPage() {
             />
           )}
 
+          {activeTab === 'initiatives' && (
+            <InitiativesTab 
+              initiatives={initiatives}
+              categories={initiativeCategories}
+              editingId={editingId}
+              setEditingId={setEditingId}
+              confirmDeleteId={confirmDeleteId}
+              setConfirmDeleteId={setConfirmDeleteId}
+              translatingId={translatingId}
+              handleAddInitiative={handleAddInitiative}
+              handleDeleteInitiative={handleDeleteInitiative}
+              handleUpdateInitiative={handleUpdateInitiative}
+              handleTranslate={(id, text, field) => handleTranslate(id, text, field, 'initiatives')}
+              handleImageUpload={handleImageUpload}
+            />
+          )}
+
+          {activeTab === 'initiative_categories' && (
+            <InitiativeCategoriesTab 
+              categories={initiativeCategories}
+              editingId={editingId}
+              setEditingId={setEditingId}
+              confirmDeleteId={confirmDeleteId}
+              setConfirmDeleteId={setConfirmDeleteId}
+              translatingId={translatingId}
+              handleAddCategory={handleAddInitiativeCategory}
+              handleDeleteCategory={handleDeleteInitiativeCategory}
+              handleUpdateCategory={handleUpdateInitiativeCategory}
+              handleTranslate={(id, text, field) => handleTranslate(id, text, field, 'initiative_categories')}
+            />
+          )}
+
           {activeTab === 'notifications' && (
             <NotificationsTab 
               notifications={notifications}
@@ -706,30 +885,6 @@ export default function AdminPage() {
                   await updateDoc(doc(db, 'notifications', id), data);
                 } catch (e) {
                   handleFirestoreError(e, OperationType.UPDATE, `notifications/${id}`);
-                }
-              }}
-            />
-          )}
-
-          {activeTab === 'categories' && (
-            <CategoriesTab 
-              categories={categories}
-              confirmDeleteId={confirmDeleteId}
-              setConfirmDeleteId={setConfirmDeleteId}
-              iconMap={iconMap}
-              handleAddCategory={async () => {
-                try {
-                  await addDoc(collection(db, 'categories'), { titleKa: 'ახალი კატეგორია', titleEn: 'New Category', icon: 'Globe', order: categories.length });
-                } catch (e) {
-                  handleFirestoreError(e, OperationType.CREATE, 'categories');
-                }
-              }}
-              handleDeleteCategory={handleDeleteCategory}
-              handleUpdateCategory={async (id, data) => {
-                try {
-                  await updateDoc(doc(db, 'categories', id), data);
-                } catch (e) {
-                  handleFirestoreError(e, OperationType.UPDATE, `categories/${id}`);
                 }
               }}
             />

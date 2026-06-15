@@ -1,5 +1,8 @@
 {
   "name": "Poti.ge",
   "description": "City Directory for Poti",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

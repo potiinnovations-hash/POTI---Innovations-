@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { auth, db, handleFirestoreError, OperationType } from '@/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { WeatherWidget } from './WeatherWidget';
 
 interface HeaderProps {
   lang: 'ka' | 'en';
@@ -70,59 +69,66 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
-          <WeatherWidget lang={lang} />
-          
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Link 
               href="/map"
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-              title={lang === 'ka' ? 'რუკა' : 'Map'}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
             >
-              <Compass size={20} className="text-slate-600 dark:text-slate-400 group-hover:text-blue-500" />
+              <Compass size={18} className="text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {lang === 'ka' ? 'რუკა' : 'Map'}
+              </span>
             </Link>
 
             <Link 
               href="/cal"
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-              title={lang === 'ka' ? 'კალენდარი' : 'Calendar'}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
             >
-              <Calendar size={20} className="text-slate-600 dark:text-slate-400 group-hover:text-blue-500" />
+              <Calendar size={18} className="text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {lang === 'ka' ? 'კალენდარი' : 'Calendar'}
+              </span>
             </Link>
 
             <Link 
               href="/status"
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-              title={lang === 'ka' ? 'სერვიზები' : 'Services'}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
             >
-              <Settings size={20} className="text-slate-600 dark:text-slate-400 group-hover:text-blue-500" />
+              <Settings size={18} className="text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {lang === 'ka' ? 'სერვისები' : 'Services'}
+              </span>
             </Link>
 
             <Link 
               href="/news"
-              className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-              title={lang === 'ka' ? 'სიახლეები' : 'News'}
+              className="relative flex items-center gap-1.5 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
             >
-              <Bell size={20} className="text-slate-600 dark:text-slate-400 group-hover:text-blue-500" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 animate-bounce">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-
-            <Link 
-              href="/plans"
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-              title={lang === 'ka' ? 'ეკოსისტემა' : 'Ecosystem'}
-            >
-              <Sparkles size={20} className="text-slate-600 dark:text-slate-400 group-hover:text-blue-500" />
+              <div className="relative">
+                <Bell size={18} className="text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border border-white dark:border-slate-900 animate-bounce">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {lang === 'ka' ? 'სიახლეები' : 'News'}
+              </span>
             </Link>
 
             <button 
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
             >
-              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+              {theme === 'light' ? (
+                <Moon size={18} className="text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+              ) : (
+                <Sun size={18} className="text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+              )}
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {lang === 'ka' ? 'დღე/ღამე' : 'Day/Night'}
+              </span>
             </button>
           </div>
           
@@ -180,10 +186,6 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
             className="md:hidden bg-white dark:bg-slate-900 border-b border-blue-100 dark:border-slate-800 overflow-hidden"
           >
             <div className="flex flex-col p-4 gap-4">
-              <div className="px-1">
-                <WeatherWidget lang={lang} />
-              </div>
-
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link 
                   href="/map"
@@ -224,16 +226,6 @@ export const Header = ({ lang, setLang, theme, setTheme, settings }: HeaderProps
                   {unreadCount > 0 && (
                     <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">{unreadCount}</span>
                   )}
-                </Link>
-              </motion.div>
-
-              <motion.div whileTap={{ scale: 0.98 }}>
-                <Link 
-                  href="/plans"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 font-bold"
-                >
-                  <Sparkles size={18} className="text-blue-500" /> {lang === 'ka' ? 'ციფრული ეკოსისტემა' : 'Digital Ecosystem'}
                 </Link>
               </motion.div>
 

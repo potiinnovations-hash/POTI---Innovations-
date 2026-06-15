@@ -121,6 +121,42 @@
         "affectedSubscribers": { "type": "string" },
         "createdAt": { "type": "string" }
       }
+    },
+    "initiatives": {
+      "title": "Project or Activity",
+      "description": "A project, grant, challenge, or information post",
+      "type": "object",
+      "properties": {
+        "titleKa": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "tag": { "type": "string", "enum": ["projects", "grants", "challenges", "info"] },
+        "icon": { "type": "string" },
+        "color": { "type": "string" },
+        "descKa": { "type": "string" },
+        "descEn": { "type": "string" },
+        "fullDetailsKa": { "type": "string" },
+        "fullDetailsEn": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "ctaTextKa": { "type": "string" },
+        "ctaTextEn": { "type": "string" },
+        "ctaUrl": { "type": "string" },
+        "ctaIcon": { "type": "string" },
+        "order": { "type": "integer" },
+        "createdAt": { "type": "string" }
+      }
+    },
+    "initiative_categories": {
+      "title": "Initiative Category",
+      "description": "Category for Projects & Activities",
+      "type": "object",
+      "properties": {
+        "titleKa": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "tag": { "type": "string" },
+        "icon": { "type": "string" },
+        "order": { "type": "integer" }
+      }
     }
   },
   "firestore": {
@@ -129,6 +165,8 @@
     "settings": { "schema": "settings", "description": "App settings" },
     "notifications": { "schema": "notifications", "description": "Notifications" },
     "news": { "schema": "news", "description": "News items" },
-    "outages": { "schema": "outages", "description": "Municipal service outages" }
+    "outages": { "schema": "outages", "description": "Municipal service outages" },
+    "initiatives": { "schema": "initiatives", "description": "Projects & Activities items" },
+    "initiative_categories": { "schema": "initiative_categories", "description": "Categories of Projects & Activities" }
   }
 }
