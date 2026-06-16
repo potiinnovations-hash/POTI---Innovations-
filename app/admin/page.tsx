@@ -411,6 +411,9 @@ export default function AdminPage() {
       imageUrl: 'https://picsum.photos/seed/news/800/600',
       sourceUrl: '',
       relatedItemId: '',
+      showOnCalendar: false,
+      calendarDate: '',
+      linkToCalendarPage: false,
       createdAt: new Date().toISOString()
     };
     try {

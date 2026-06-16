@@ -269,6 +269,62 @@ export const NewsTab = ({
                             />
                           </div>
                         </div>
+
+                        {/* Calendar Integration section */}
+                        <div className="bg-slate-100/50 p-5 rounded-[2rem] border border-slate-200/50 space-y-4">
+                          <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest px-1 flex items-center gap-2">
+                            <Sparkles size={14} className="text-blue-500" />
+                            კალენდართან ინტეგრაცია
+                          </h4>
+                          
+                          <div className="flex items-center justify-between px-1">
+                            <span className="text-xs font-black text-slate-500 uppercase tracking-wider">კალენდარზე გამოჩენა</span>
+                            <label className="relative inline-flex items-center cursor-pointer select-none">
+                              <input 
+                                type="checkbox" 
+                                className="sr-only peer"
+                                checked={item.showOnCalendar || false}
+                                onChange={(e) => handleUpdateNews(item.id, { showOnCalendar: e.target.checked })}
+                              />
+                              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+
+                          <AnimatePresence initial={false}>
+                            {(item.showOnCalendar) && (
+                              <motion.div 
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="space-y-4 overflow-hidden pt-2"
+                              >
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">ღონისძიების თარიღი</label>
+                                  <input 
+                                    type="date"
+                                    required
+                                    className="w-full bg-white border-none p-3.5 rounded-xl font-bold text-slate-900 shadow-sm text-sm"
+                                    value={item.calendarDate || ''}
+                                    onChange={(e) => handleUpdateNews(item.id, { calendarDate: e.target.value })}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between px-1 pt-1">
+                                  <span className="text-xs font-black text-slate-500 uppercase tracking-wider">კალენდრის გვერდზე გადამისამართება</span>
+                                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                                    <input 
+                                      type="checkbox" 
+                                      className="sr-only peer"
+                                      checked={item.linkToCalendarPage || false}
+                                      onChange={(e) => handleUpdateNews(item.id, { linkToCalendarPage: e.target.checked })}
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                  </label>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </div>
                     </div>
                   </div>
