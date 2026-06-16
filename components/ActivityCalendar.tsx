@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -18,12 +18,6 @@ interface CalendarEvent {
   end: string;
   allDay?: boolean;
   link?: string;
-  isNewsItem?: boolean;
-  relatedNewsId?: string;
-  titleKa?: string;
-  titleEn?: string;
-  contentKa?: string;
-  contentEn?: string;
 }
 
 interface ActivityCalendarProps {
@@ -32,20 +26,49 @@ interface ActivityCalendarProps {
 }
 
 export default function ActivityCalendar({ lang, showTitle = true }: ActivityCalendarProps) {
-  const [manualEvents, setManualEvents] = useState<any[]>([]);
-  const [newsEvents, setNewsEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Subscribe to public calendar events and news calendar events
+  // Subscribe to public calendar events
   useEffect(() => {
     const unsubscribeEvents = onSnapshot(
       doc(db, 'settings', 'events'),
       (snapshot) => {
         if (snapshot.exists() && snapshot.data().list) {
-          setManualEvents(snapshot.data().list);
+          const fetchedEvents = snapshot.data().list;
+          setEvents(fetchedEvents);
+
+          if (fetchedEvents.length > 0) {
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+
+            const upcoming = fetchedEvents
+              .filter((e: any) => e?.start)
+              .map((e: any) => ({ ...e, parsedDate: new Date(e.start) }))
+              .filter((e: any) => !isNaN(e.parsedDate.getTime()))
+              .filter((e: any) => e.parsedDate >= now)
+              .sort((a: any, b: any) => a.parsedDate.getTime() - b.parsedDate.getTime());
+
+            if (upcoming.length > 0) {
+              setSelectedEvent(upcoming[0]);
+              setSelectedDate(new Date(upcoming[0].start));
+              setCurrentDate(new Date(upcoming[0].start));
+            } else {
+              const sorted = [...fetchedEvents]
+                .filter((e: any) => e?.start)
+                .map((e: any) => ({ ...e, parsedDate: new Date(e.start) }))
+                .filter((e: any) => !isNaN(e.parsedDate.getTime()))
+                .sort((a: any, b: any) => a.parsedDate.getTime() - b.parsedDate.getTime());
+              if (sorted.length > 0) {
+                setSelectedEvent(sorted[0]);
+                setSelectedDate(new Date(sorted[0].start));
+                setCurrentDate(new Date(sorted[0].start));
+              }
+            }
+          }
         }
         setLoading(false);
       },
@@ -55,82 +78,14 @@ export default function ActivityCalendar({ lang, showTitle = true }: ActivityCal
       }
     );
 
-    const qNews = query(collection(db, 'news'), where('showOnCalendar', '==', true));
-    const unsubscribeNews = onSnapshot(
-      qNews,
-      (snapshot) => {
-        const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        setNewsEvents(list);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, 'news');
-      }
-    );
-
-    return () => {
-      unsubscribeEvents();
-      unsubscribeNews();
-    };
+    return () => unsubscribeEvents();
   }, []);
-
-  // Dynamically merge manual and news events
-  const events = React.useMemo(() => {
-    const manualMapped = manualEvents.map(ev => ({
-      ...ev,
-      isNewsItem: false
-    }));
-
-    const newsMapped = newsEvents.map(item => ({
-      id: `news-${item.id}`,
-      title: lang === 'ka' ? (item.titleKa || '') : (item.titleEn || item.titleKa || ''),
-      description: lang === 'ka' ? (item.contentKa || '') : (item.contentEn || item.contentKa || ''),
-      start: item.calendarDate || '',
-      end: item.calendarDate || '',
-      allDay: true,
-      link: item.linkToCalendarPage ? `/news` : (item.sourceUrl || `/news`),
-      isNewsItem: true,
-      relatedNewsId: item.id
-    }));
-
-    return [...manualMapped, ...newsMapped];
-  }, [manualEvents, newsEvents, lang]);
-
-  // Set default selected date once events are loaded
-  useEffect(() => {
-    if (events.length > 0 && !selectedDate) {
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-
-      const upcoming = events
-        .filter(e => e?.start)
-        .map(e => ({ ...e, parsedDate: new Date(e.start) }))
-        .filter(e => !isNaN(e.parsedDate.getTime()))
-        .filter(e => e.parsedDate >= now)
-        .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
-
-      if (upcoming.length > 0) {
-        setSelectedEvent(upcoming[0]);
-        setSelectedDate(new Date(upcoming[0].start));
-        setCurrentDate(new Date(upcoming[0].start));
-      } else {
-        const sorted = [...events]
-          .filter(e => e?.start)
-          .map(e => ({ ...e, parsedDate: new Date(e.start) }))
-          .filter(e => !isNaN(e.parsedDate.getTime()))
-          .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
-        if (sorted.length > 0) {
-          setSelectedEvent(sorted[0]);
-          setSelectedDate(new Date(sorted[0].start));
-          setCurrentDate(new Date(sorted[0].start));
-        }
-      }
-    }
-  }, [events, selectedDate]);
 
   const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
   
   const getFirstDayOfMonth = (year: number, month: number) => {
     const day = new Date(year, month, 1).getDay();
+    // Map so that Monday is 0 and Sunday is 6
     return day === 0 ? 6 : day - 1;
   };
 
@@ -369,21 +324,14 @@ export default function ActivityCalendar({ lang, showTitle = true }: ActivityCal
                   {activeEvents.map((ev) => (
                     <div key={ev.id} className="space-y-3 pb-5 border-b border-slate-100 dark:border-slate-800/80 last:border-none last:pb-0">
                       <div>
-                        <div className="flex flex-wrap gap-1.5 mb-1">
-                          <span className="inline-block px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-extrabold text-[10px] uppercase rounded-full">
-                            {ev.allDay 
-                              ? (lang === 'ka' ? 'მთელი დღე' : 'All Day') 
-                              : `${(() => {
-                                  const parsed = new Date(ev.start);
-                                  return !isNaN(parsed.getTime()) ? parsed.toLocaleTimeString(lang === 'ka' ? 'ka-GE' : 'en-US', { hour: '2-digit', minute: '2-digit' }) : '';
-                                })()}`}
-                          </span>
-                          {ev.isNewsItem && (
-                            <span className="inline-block px-2.5 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 font-extrabold text-[10px] uppercase rounded-full">
-                              {lang === 'ka' ? 'სიახლე' : 'News'}
-                            </span>
-                          )}
-                        </div>
+                        <span className="inline-block px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-extrabold text-[10px] uppercase rounded-full mb-1">
+                          {ev.allDay 
+                            ? (lang === 'ka' ? 'მთელი დღე' : 'All Day') 
+                            : `${(() => {
+                                const parsed = new Date(ev.start);
+                                return !isNaN(parsed.getTime()) ? parsed.toLocaleTimeString(lang === 'ka' ? 'ka-GE' : 'en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+                              })()}`}
+                        </span>
                         <h4 className="text-base font-black text-blue-950 dark:text-white leading-snug">
                           {ev.title}
                         </h4>
@@ -404,16 +352,15 @@ export default function ActivityCalendar({ lang, showTitle = true }: ActivityCal
                       )}
 
                       {ev.link && (
-                        <Link 
+                        <a 
                           href={ev.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-center justify-center gap-2 w-full p-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 rounded-2xl font-black text-xs transition-colors"
                         >
                           <ExternalLink size={14} />
-                          {ev.isNewsItem 
-                            ? (lang === 'ka' ? 'სიახლის სრულად ნახვა' : 'View Full Article')
-                            : (lang === 'ka' ? 'სრული ინფორმაცია იხილეთ აქ' : 'View Full Details Here')
-                          }
-                        </Link>
+                          {lang === 'ka' ? 'სრული ინფორმაცია იხილეთ აქ' : 'View Full Details Here'}
+                        </a>
                       )}
                     </div>
                   ))}

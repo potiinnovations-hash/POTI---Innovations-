@@ -1,19 +1,20 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { doc, getDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { db, auth, handleFirestoreError, OperationType } from '@/firebase';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import LoadingScreen from '@/components/LoadingScreen';
 import { LighthouseBackground } from '@/components/LighthouseBackground';
+import { NotificationBanner } from '@/components/NotificationBanner';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Calendar as CalendarIcon, ChevronLeft, ChevronRight, MapPin, Clock, AlignLeft, LogIn, ExternalLink, Sparkles
+  Calendar as CalendarIcon, ChevronLeft, ChevronRight, RefreshCw, 
+  CheckCircle, AlertCircle, Info, MapPin, Clock, AlignLeft, LogIn, ExternalLink, Settings
 } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
 import SEOManager from '@/components/SEOManager';
 
 interface CalendarEvent {
@@ -25,28 +26,21 @@ interface CalendarEvent {
   end: string;
   allDay?: boolean;
   link?: string;
-  isNewsItem?: boolean;
-  relatedNewsId?: string;
-  titleKa?: string;
-  titleEn?: string;
-  contentKa?: string;
-  contentEn?: string;
 }
 
-function CalendarPageContent() {
+export default function CalendarPage() {
   const [lang, setLang] = useState<'ka' | 'en'>('ka');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isInitialized, setIsInitialized] = useState(false);
   const [settings, setSettings] = useState<any>({});
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAdminUser, setIsAdminUser] = useState(false);
-  const searchParams = useSearchParams();
   
   // Calendar states
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [manualEvents, setManualEvents] = useState<any[]>([]);
-  const [newsEvents, setNewsEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -106,7 +100,37 @@ function CalendarPageContent() {
       doc(db, 'settings', 'events'),
       (snapshot) => {
         if (snapshot.exists() && snapshot.data().list) {
-          setManualEvents(snapshot.data().list);
+          const fetchedEvents = snapshot.data().list;
+          setEvents(fetchedEvents);
+          
+          if (fetchedEvents.length > 0) {
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            
+            const upcoming = fetchedEvents
+              .filter((e: any) => e?.start)
+              .map((e: any) => ({ ...e, parsedDate: new Date(e.start) }))
+              .filter((e: any) => !isNaN(e.parsedDate.getTime()))
+              .filter((e: any) => e.parsedDate >= now)
+              .sort((a: any, b: any) => a.parsedDate.getTime() - b.parsedDate.getTime());
+              
+            if (upcoming.length > 0) {
+              setSelectedEvent(upcoming[0]);
+              setSelectedDate(new Date(upcoming[0].start));
+              setCurrentDate(new Date(upcoming[0].start));
+            } else {
+              const sorted = [...fetchedEvents]
+                .filter((e: any) => e?.start)
+                .map((e: any) => ({ ...e, parsedDate: new Date(e.start) }))
+                .filter((e: any) => !isNaN(e.parsedDate.getTime()))
+                .sort((a: any, b: any) => a.parsedDate.getTime() - b.parsedDate.getTime());
+              if (sorted.length > 0) {
+                setSelectedEvent(sorted[0]);
+                setSelectedDate(new Date(sorted[0].start));
+                setCurrentDate(new Date(sorted[0].start));
+              }
+            }
+          }
         }
         setLoading(false);
       },
@@ -116,16 +140,12 @@ function CalendarPageContent() {
       }
     );
 
-    // 3. Listen to news collection events configured to display on calendar
-    const qNews = query(collection(db, 'news'), where('showOnCalendar', '==', true));
-    const unsubscribeNews = onSnapshot(
-      qNews,
-      (snapshot) => {
-        const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        setNewsEvents(list);
-      },
+    // 3. Listen to notifications
+    const unsubscribeNotifs = onSnapshot(
+      doc(db, 'settings', 'global'), // default to some notifications stream if matching, otherwise empty is fine
+      () => {},
       (error) => {
-        handleFirestoreError(error, OperationType.LIST, 'news');
+        handleFirestoreError(error, OperationType.LIST, 'notifications');
       }
     );
 
@@ -133,10 +153,12 @@ function CalendarPageContent() {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
+        // Simple check if they are the admin email or if admin flag is present in Firestore
         const isAdminEmail = user.email === 'potiinnovations@gmail.com';
         if (isAdminEmail) {
           setIsAdminUser(true);
         } else {
+          // Fallback check in /admins collection
           try {
             const adminDoc = await getDoc(doc(db, 'admins', user.uid));
             setIsAdminUser(adminDoc.exists());
@@ -152,7 +174,6 @@ function CalendarPageContent() {
     return () => {
       unsubscribeSettings();
       unsubscribeEvents();
-      unsubscribeNews();
       unsubscribeAuth();
     };
   }, []);
@@ -179,95 +200,11 @@ function CalendarPageContent() {
     }
   }, [settings]);
 
-  // Dynamically merge manual and news events
-  const events = React.useMemo(() => {
-    const manualMapped = manualEvents.map(ev => ({
-      ...ev,
-      isNewsItem: false
-    }));
-
-    const newsMapped = newsEvents.map(item => ({
-      id: `news-${item.id}`,
-      title: lang === 'ka' ? (item.titleKa || '') : (item.titleEn || item.titleKa || ''),
-      description: lang === 'ka' ? (item.contentKa || '') : (item.contentEn || item.contentKa || ''),
-      start: item.calendarDate || '',
-      end: item.calendarDate || '',
-      allDay: true,
-      link: item.linkToCalendarPage ? `/news` : (item.sourceUrl || `/news`),
-      isNewsItem: true,
-      relatedNewsId: item.id
-    }));
-
-    return [...manualMapped, ...newsMapped];
-  }, [manualEvents, newsEvents, lang]);
-
-  // Load URL Date Parameter on calendar init/load, or fall back to first upcoming
-  useEffect(() => {
-    if (events.length > 0) {
-      const dateParam = searchParams.get('date');
-      if (dateParam) {
-        const targetDate = new Date(dateParam);
-        if (!isNaN(targetDate.getTime())) {
-          setSelectedDate(targetDate);
-          setCurrentDate(targetDate);
-          
-          // Select event on that day
-          const dayEvents = events.filter(e => {
-            if (!e?.start) return false;
-            if (typeof e.start === 'string' && e.start.length === 10) {
-              const [y, m, d] = e.start.split('-').map(Number);
-              return y === targetDate.getFullYear() && (m - 1) === targetDate.getMonth() && d === targetDate.getDate();
-            }
-            const eStart = new Date(e.start);
-            return !isNaN(eStart.getTime()) &&
-                   eStart.getFullYear() === targetDate.getFullYear() &&
-                   eStart.getMonth() === targetDate.getMonth() &&
-                   eStart.getDate() === targetDate.getDate();
-          });
-          if (dayEvents.length > 0) {
-            setSelectedEvent(dayEvents[0]);
-          } else {
-            setSelectedEvent(null);
-          }
-          return;
-        }
-      }
-
-      // Default fallback: select next upcoming event
-      if (!selectedDate) {
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        
-        const upcoming = events
-          .filter(e => e?.start)
-          .map(e => ({ ...e, parsedDate: new Date(e.start) }))
-          .filter(e => !isNaN(e.parsedDate.getTime()))
-          .filter(e => e.parsedDate >= now)
-          .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
-          
-        if (upcoming.length > 0) {
-          setSelectedEvent(upcoming[0]);
-          setSelectedDate(new Date(upcoming[0].start));
-          setCurrentDate(new Date(upcoming[0].start));
-        } else {
-          const sorted = [...events]
-            .filter(e => e?.start)
-            .map(e => ({ ...e, parsedDate: new Date(e.start) }))
-            .filter(e => !isNaN(e.parsedDate.getTime()))
-            .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
-          if (sorted.length > 0) {
-            setSelectedEvent(sorted[0]);
-            setSelectedDate(new Date(sorted[0].start));
-            setCurrentDate(new Date(sorted[0].start));
-          }
-        }
-      }
-    }
-  }, [events, searchParams, selectedDate]);
-
+  // Helper calendar functions
   const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year: number, month: number) => {
     const day = new Date(year, month, 1).getDay();
+    // Re-map so that Monday is 0 and Sunday is 6
     return day === 0 ? 6 : day - 1;
   };
 
@@ -279,6 +216,35 @@ function CalendarPageContent() {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
+  // Helper to ensure Firestore never receives invalid values
+  const sanitizeEvent = (ev: any): CalendarEvent => {
+    return {
+      id: String(ev.id || Math.random().toString()),
+      title: String(ev.title || 'No Title'),
+      description: ev.description ? String(ev.description) : '',
+      location: ev.location ? String(ev.location) : '',
+      start: String(ev.start || ''),
+      end: String(ev.end || ''),
+      allDay: Boolean(ev.allDay),
+      link: ev.link ? String(ev.link) : ''
+    };
+  };
+
+  // Helper to force a timeout on hanging Firestore writes
+  const writeWithTimeout = (docRef: any, data: any, timeoutMs = 25000) => {
+    const writePromise = setDoc(docRef, data);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error(lang === 'ka' 
+          ? 'მონაცემთა ბაზასთან კავშირი გაწყდა ან დრო ამოიწურა. გთხოვთ შეამოწმოთ ინტერნეტი და ადმინისტრატორის უფლებები.'
+          : 'Database connection timed out. Please check your internet and administrator permissions.')), 
+        timeoutMs
+      )
+    );
+    return Promise.race([writePromise, timeoutPromise]);
+  };
+
+  // Helper to see if standard day has events
   const getSafeDate = (d: any): Date => {
     if (!d) return new Date();
     const parsed = d instanceof Date ? d : new Date(d);
@@ -290,6 +256,7 @@ function CalendarPageContent() {
     return events.filter(e => {
       if (!e?.start) return false;
       
+      // If start is YYYY-MM-DD
       if (typeof e.start === 'string' && e.start.length === 10) {
         const [y, m, d] = e.start.split('-').map(Number);
         return y === day.getFullYear() && (m - 1) === day.getMonth() && d === day.getDate();
@@ -303,21 +270,26 @@ function CalendarPageContent() {
     });
   };
 
+  // Find first / next planned event from the events list
   const getNextPlannedEvent = () => {
     if (!events || events.length === 0) return null;
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     
+    // Sort events to be chronological
     const sortedEvents = [...events]
       .filter(e => e?.start)
       .map(e => ({ ...e, parsedDate: new Date(e.start) }))
       .filter(e => !isNaN(e.parsedDate.getTime()))
       .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
 
+    // Try starting from today
     const upcoming = sortedEvents.filter(e => e.parsedDate >= now);
     if (upcoming.length > 0) {
       return upcoming[0];
     }
+    
+    // Fallback to first available chronological event
     return sortedEvents[0] || null;
   };
 
@@ -325,6 +297,9 @@ function CalendarPageContent() {
   const activeDate = getSafeDate(selectedDate || (nextPlanned ? nextPlanned.parsedDate : null));
   const activeEvents = getEventsForDay(activeDate);
 
+
+
+  // Month-year label
   const monthNamesKa = [
     'იანვარი', 'თებერვალი', 'მარტი', 'აპრილი', 'მაისი', 'ივნისი',
     'ივლისი', 'აგვისტო', 'სექტემბერი', 'ოქტომბერი', 'ნოემბერი', 'დეკემბერი'
@@ -344,10 +319,15 @@ function CalendarPageContent() {
   const daysInMonth = getDaysInMonth(year, month);
   const firstDayIndex = getFirstDayOfMonth(year, month);
 
+  // Generate calendar cells (blanks then numbered days)
   const calendarDays: { dayNum: number | null; dateObj: Date | null }[] = [];
+  
+  // Backfill previous month days prefix
   for (let i = 0; i < firstDayIndex; i++) {
     calendarDays.push({ dayNum: null, dateObj: null });
   }
+
+  // Populate days of the current month
   for (let d = 1; d <= daysInMonth; d++) {
     calendarDays.push({
       dayNum: d,
@@ -373,6 +353,7 @@ function CalendarPageContent() {
       />
 
       <main className="container mx-auto px-4 py-8 relative z-10 max-w-5xl">
+        {/* Header section with description */}
         <div className="text-center mb-8">
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
@@ -400,9 +381,10 @@ function CalendarPageContent() {
           </motion.p>
         </div>
 
+        {/* Standard User Calendar Box */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* Calendar main panel */}
+          {/* Calendar main panel (Spans 2 columns) */}
           <div className="md:col-span-2 bg-white dark:bg-slate-900 border border-blue-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
             
             {/* Calendar Month Header */}
@@ -443,6 +425,8 @@ function CalendarPageContent() {
                 
                 const dayEvents = cell.dateObj ? getEventsForDay(cell.dateObj) : [];
                 const hasEvents = dayEvents.length > 0;
+
+                // Check if today
                 const isToday = cell.dateObj && cell.dateObj.toDateString() === new Date().toDateString();
 
                 const cellClasses = !cell.dayNum
@@ -487,7 +471,7 @@ function CalendarPageContent() {
 
           </div>
 
-          {/* Event Sidebar detail */}
+          {/* Event Sidebar detail (Spans 1 column) */}
           <div className="bg-white dark:bg-slate-900 border border-blue-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between h-fit">
             <div>
               <h3 className="text-lg font-black text-blue-950 dark:text-white uppercase tracking-tight pb-3 border-b border-slate-100 dark:border-slate-800 mb-4 flex items-center gap-2">
@@ -525,22 +509,14 @@ function CalendarPageContent() {
                     {activeEvents.map((ev) => (
                       <div key={ev.id} className="space-y-3 pb-5 border-b border-slate-100 dark:border-slate-800/80 last:border-none last:pb-0">
                         <div>
-                          <div className="flex flex-wrap gap-1.5 mb-1">
-                            <span className="inline-block px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-extrabold text-[10px] uppercase rounded-full">
-                              {ev.allDay 
-                                ? (lang === 'ka' ? 'მთელი დღე' : 'All Day') 
-                                : `${(() => {
-                                    const parsed = new Date(ev.start);
-                                    return !isNaN(parsed.getTime()) ? parsed.toLocaleTimeString(lang === 'ka' ? 'ka-GE' : 'en-US', { hour: '2-digit', minute: '2-digit' }) : '';
-                                  })()}`}
-                            </span>
-                            {ev.isNewsItem && (
-                              <span className="inline-block px-2.5 py-1 bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 font-extrabold text-[10px] uppercase rounded-full">
-                                {lang === 'ka' ? 'სიახლე' : 'News'}
-                              </span>
-                            )}
-                          </div>
-                          
+                          <span className="inline-block px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-extrabold text-[10px] uppercase rounded-full mb-1">
+                            {ev.allDay 
+                              ? (lang === 'ka' ? 'მთელი დღე' : 'All Day') 
+                              : `${(() => {
+                                  const parsed = new Date(ev.start);
+                                  return !isNaN(parsed.getTime()) ? parsed.toLocaleTimeString(lang === 'ka' ? 'ka-GE' : 'en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+                                })()}`}
+                          </span>
                           <h4 className="text-base font-black text-blue-950 dark:text-white leading-snug">
                             {ev.title}
                           </h4>
@@ -563,13 +539,12 @@ function CalendarPageContent() {
                         {ev.link && (
                           <a 
                             href={ev.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 w-full p-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 rounded-2xl font-black text-xs transition-colors"
                           >
                             <ExternalLink size={14} />
-                            {ev.isNewsItem 
-                              ? (lang === 'ka' ? 'სიახლის სრულად ნახვა' : 'View Full Article')
-                              : (lang === 'ka' ? 'სრული ინფორმაცია იხილეთ აქ' : 'View Full Details Here')
-                            }
+                            {lang === 'ka' ? 'სრული ინფორმაცია იხილეთ აქ' : 'View Full Details Here'}
                           </a>
                         )}
                       </div>
@@ -599,6 +574,7 @@ function CalendarPageContent() {
 
         </div>
 
+        {/* Public view login trigger */}
         {!currentUser && (
           <div className="mt-10 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
             <Link 
@@ -615,13 +591,5 @@ function CalendarPageContent() {
 
       <Footer lang={lang} />
     </div>
-  );
-}
-
-export default function CalendarPage() {
-  return (
-    <Suspense fallback={<LoadingScreen />}>
-      <CalendarPageContent />
-    </Suspense>
   );
 }

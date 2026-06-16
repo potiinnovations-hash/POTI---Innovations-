@@ -103,10 +103,7 @@
         "imageUrl": { "type": "string" },
         "sourceUrl": { "type": "string" },
         "relatedItemId": { "type": "string" },
-        "createdAt": { "type": "string" },
-        "showOnCalendar": { "type": "boolean" },
-        "calendarDate": { "type": "string" },
-        "linkToCalendarPage": { "type": "boolean" }
+        "createdAt": { "type": "string" }
       }
     },
     "outages": {

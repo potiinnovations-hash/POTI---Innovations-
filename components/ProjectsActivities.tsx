@@ -6,7 +6,6 @@ import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
 import { Briefcase, Award, Flame, BookOpen, ArrowRight, Calendar, Tag, AlertCircle, Info, Sparkles, Clock, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 // Comprehensive Icon Map for customizable icons
 const iconMap: Record<string, any> = {
@@ -65,8 +64,7 @@ export const ProjectsActivities = ({ lang }: ProjectsActivitiesProps) => {
       descKa: 'ქალაქ ფოთის პარკებისა და სკვერების განახლებისა და გამწვანების მასშტაბური ინიციატივა.',
       descEn: 'A large-scale project for urban greening, restoring local parks, and expanding green spaces in Poti.',
       fullDetailsKa: 'პროექტის ფარგლებში იგეგმება 1500-ზე მეტი ენდემური ხის დარგვა ქალაქის მასშტაბით, ცენტრალური ბულვარის რეკონსტრუქცია, სარწყავი ავტომატიზებული სისტემების დამონტაჟება და ახალი საპარკე ზონების მოწყობა.',
-      fullDetailsEn: 'Under the framework of this project, we plan to plant over 1,500 endemic trees city-wide, reconstruct the central boulevard, install automated watering systems, and design brand-new leisure park zones.',
-      imageUrl: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80'
+      fullDetailsEn: 'Under the framework of this project, we plan to plant over 1,500 endemic trees city-wide, reconstruct the central boulevard, install automated watering systems, and design brand-new leisure park zones.'
     },
     {
       id: 'municipal-grant',
@@ -80,8 +78,7 @@ export const ProjectsActivities = ({ lang }: ProjectsActivitiesProps) => {
       descKa: 'ადგილობრივი სტუდენტებისა და ახალგაზრდა დეველოპერების ტექნოლოგიური იდეების მხარდამჭერი საგრანტო პროგრამა.',
       descEn: 'Support grants program for Poti’s students, young innovators, and digital startup concepts.',
       fullDetailsKa: 'საგრანტო ფონდი ითვალისწინებს 5,000 ლარამდე ფინანსურ მხარდაჭერას იმ პროექტებისთვის, რომლებიც ორიენტირებულია ქალაქის ყოველდღიური სერვისების გაუმჯობესებაზე.',
-      fullDetailsEn: 'The grant fund provides up to 5,000 GEL of direct seed funding for software projects aiming to improve daily urban systems and citizen experiences in Poti.',
-      imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80'
+      fullDetailsEn: 'The grant fund provides up to 5,000 GEL of direct seed funding for software projects aiming to improve daily urban systems and citizen experiences in Poti.'
     },
     {
       id: 'smart-poti',
@@ -95,8 +92,7 @@ export const ProjectsActivities = ({ lang }: ProjectsActivitiesProps) => {
       descKa: 'ქალაქის სერვისების გაუმჯობესებაზე ორიენტირებული 48-საათიანი ტექნოლოგიური შეჯიბრი.',
       descEn: 'A continuous 48-hour challenge event for coding, designing, and engineering smart municipal solutions.',
       fullDetailsKa: 'იდეების კონკურსი და ჰაკათონი, სადაც კოდერები, დიზაინერები და აქტიური მოქალაქეები ქმნიან ციფრულ პროტოტიპებს ფოთის წინაშე არსებული გამოწვევების გადასაჭრელად.',
-      fullDetailsEn: 'An ideas contest and hackathon where software developers, UI designers, and civic minds build digital prototypes answering urban needs.',
-      imageUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80'
+      fullDetailsEn: 'An ideas contest and hackathon where software developers, UI designers, and civic minds build digital prototypes answering urban needs.'
     },
     {
       id: 'poti-docs',
@@ -110,8 +106,7 @@ export const ProjectsActivities = ({ lang }: ProjectsActivitiesProps) => {
       descKa: 'ფოთის კულტურული მემკვიდრეობისა და ეკოტურიზმის პოპულარიზაციის ახალი სამოქმედო გეგმა.',
       descEn: 'Strategic efforts to boost local ecotourism, modernize signage, and highlight historical landmarks.',
       fullDetailsKa: 'ეს არის ღია ინფორმაციული რესურსი, რომელიც აერთიანებს ქალაქის განვითარების კვლევებს, ისტორიულ დოკუმენტებსა და ტურისტულ მეხსიერებას.',
-      fullDetailsEn: 'A completely open info portal bringing together city development plans, historical research, and ecotourist guides.',
-      imageUrl: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80'
+      fullDetailsEn: 'A completely open info portal bringing together city development plans, historical research, and ecotourist guides.'
     }
   ];
 
@@ -231,47 +226,44 @@ export const ProjectsActivities = ({ lang }: ProjectsActivitiesProps) => {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 15 }}
                 transition={{ duration: 0.3 }}
-                className="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_45px_rgba(37,99,235,0.08)] hover:border-slate-200 dark:hover:border-slate-700/80 transition-all duration-300"
+                className="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_45px_rgba(37,99,235,0.08)] hover:border-slate-200 dark:hover:border-slate-700/80 transition-all duration-300"
               >
-                {/* Image top container */}
-                <div className="relative aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-850">
-                  <Image
-                    src={app.imageUrl || `https://picsum.photos/seed/${app.id}/800/600`}
-                    alt={lang === 'ka' ? app.titleKa : app.titleEn}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    referrerPolicy="no-referrer"
-                  />
-                  {/* Category Pill floating on top */}
-                  <span className="absolute top-4 left-4 z-10 px-3 py-1.5 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border border-slate-100/10 dark:border-slate-800/20 font-black text-[9px] uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                    {categoryName}
-                  </span>
+                {/* Decorative aura */}
+                <span className={`absolute -right-16 -top-16 w-32 h-32 rounded-full bg-gradient-to-br ${gradientColor} opacity-[0.03] group-hover:opacity-10 transition-opacity duration-500 blur-2xl`} />
+
+                <div>
+                  <div className="flex items-center justify-between gap-4 mb-6">
+                    {/* Icon container */}
+                    <div className={`p-3 rounded-2xl bg-gradient-to-br ${gradientColor} text-white shadow-lg`}>
+                      <IconComponent size={22} />
+                    </div>
+
+                    {/* Category Pill */}
+                    <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-800 font-extrabold text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      {categoryName}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-lg font-black tracking-tight text-slate-800 dark:text-slate-100 mb-2 leading-snug">
+                    {lang === 'ka' ? app.titleKa : app.titleEn}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-bold leading-relaxed mb-6 line-clamp-3">
+                    {lang === 'ka' ? app.descKa : app.descEn}
+                  </p>
                 </div>
 
-                <div className="p-6 flex flex-col justify-between flex-grow">
-                  <div>
-                    {/* Title */}
-                    <h3 className="text-base font-black tracking-tight text-slate-800 dark:text-slate-100 mb-2 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {lang === 'ka' ? app.titleKa : app.titleEn}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-slate-500 dark:text-slate-400 text-xs font-bold leading-relaxed mb-4 line-clamp-3">
-                      {lang === 'ka' ? app.descKa : app.descEn}
-                    </p>
-                  </div>
-
-                  {/* Direct Link Navigation Section */}
-                  <div className="pt-4 border-t border-slate-50 dark:border-slate-850/50 flex items-center justify-between">
-                    <Link
-                      href={`/projects?id=${app.id}`}
-                      className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5 group-hover:text-blue-700 dark:group-hover:text-blue-300 hover:underline transition-colors"
-                    >
-                      <span>{lang === 'ka' ? 'სრულად' : 'Read more'}</span>
-                      <ArrowRight size={14} className="transition-transform group-hover:translate-x-1 duration-300" />
-                    </Link>
-                  </div>
+                {/* Direct Link Navigation Section */}
+                <div className="pt-4 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-between">
+                  <Link
+                    href={`/projects?id=${app.id}`}
+                    className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5 group-hover:text-blue-700 dark:group-hover:text-blue-300 hover:underline transition-colors"
+                  >
+                    <span>{lang === 'ka' ? 'სრულად' : 'Read more'}</span>
+                    <ArrowRight size={14} className="transition-transform group-hover:translate-x-1 duration-300" />
+                  </Link>
                 </div>
               </motion.div>
             );

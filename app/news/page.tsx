@@ -8,7 +8,7 @@ import Footer from '@/components/Footer';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { ExternalLink, Calendar, ArrowRight, Bell, Sparkles } from 'lucide-react';
+import { ExternalLink, Calendar, ArrowRight, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import SEOManager from '@/components/SEOManager';
@@ -171,17 +171,11 @@ function NewsContent() {
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
                       referrerPolicy="no-referrer"
                     />
-                     <div className="absolute top-4 left-4 flex flex-col gap-2">
-                      <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 flex items-center gap-2 shadow-sm border border-slate-100/10 dark:border-slate-800/20">
+                    <div className="absolute top-4 left-4">
+                      <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 flex items-center gap-2">
                         <Calendar size={12} />
                         {new Date(item.createdAt).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US')}
                       </div>
-                      {item.showOnCalendar && item.calendarDate && (
-                        <div className="bg-purple-600 text-white px-2.5 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md">
-                          <Sparkles size={11} className="animate-pulse text-yellow-300" />
-                          {lang === 'ka' ? 'კალენდარი' : 'Calendar'}
-                        </div>
-                      )}
                     </div>
                   </div>
                   <div className="p-8">
@@ -192,16 +186,7 @@ function NewsContent() {
                       {lang === 'ka' ? item.contentKa : item.contentEn}
                     </p>
                     <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-slate-800">
-                      {item.linkToCalendarPage && item.calendarDate ? (
-                        <Link 
-                          href={`/cal?date=${item.calendarDate}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-2 text-sm font-black text-purple-600 dark:text-purple-400 hover:gap-3 transition-all"
-                        >
-                          {lang === 'ka' ? 'კალენდარში ნახვა' : 'View on Calendar'}
-                          <Calendar size={16} />
-                        </Link>
-                      ) : item.sourceUrl ? (
+                      {item.sourceUrl ? (
                         <a 
                           href={item.sourceUrl}
                           target="_blank"
